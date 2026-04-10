@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F0F2">
+
+    <ImageView
+        android:id="@+id/ivOnboardingImageTwo"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:contentDescription="Ilustración de gráficos o billetera"
+        android:src="@drawable/one_boarding_two"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.296" />
+
+    <TextView
+        android:id="@+id/tvWelcomeDescTwo"
+        android:layout_width="316dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:lineSpacingExtra="6dp"
+        android:text="Registra ingresos, gastos y descubre cuánto ganas realmente."
+        android:textAlignment="viewStart"
+        android:textColor="#2B558C"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivOnboardingImageTwo" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnStart"
+        android:layout_width="500px"
+        android:layout_height="50dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="68dp"
+        android:text="Empezar"
+        android:textColor="#F0F0F2"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:backgroundTint="#2B558C"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toTopOf="@id/llIndicatorsTwo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/llIndicatorsTwo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="36dp"
+            android:layout_height="6dp"
+            android:layout_marginEnd="8dp"
+            app:cardBackgroundColor="#D9D9D9"
+            app:cardCornerRadius="3dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="36dp"
+            android:layout_height="6dp"
+            app:cardBackgroundColor="#2B558C"
+            app:cardCornerRadius="3dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

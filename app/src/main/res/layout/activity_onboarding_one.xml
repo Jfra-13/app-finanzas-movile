@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F0F2">
+
+    <TextView
+        android:id="@+id/tvSkip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="348dp"
+        android:layout_marginTop="36dp"
+        android:text="Omitir"
+        android:textColor="#2B558C"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvWelcomeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="144dp"
+        android:text="Bienvenido"
+        android:textColor="#2B558C"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSkip" />
+
+    <TextView
+        android:id="@+id/tvWelcomeDesc"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="124dp"
+        android:lineSpacingExtra="4dp"
+        android:text="Olvida el cuaderno. Lleva el control de tu negocio en tu bolsillo."
+        android:textAlignment="viewStart"
+        android:textColor="#2B558C"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcomeTitle" />
+
+    <ImageView
+        android:id="@+id/ivOnboardingImage"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:src="@drawable/splash_logo"
+        android:translationX="150dp"
+        app:layout_constraintBottom_toTopOf="@id/btnNext"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcomeDesc"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnNext"
+        android:layout_width="191dp"
+        android:layout_height="58dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginBottom="52dp"
+        android:paddingHorizontal="32dp"
+        android:paddingVertical="12dp"
+        android:text="Siguiente"
+        android:textColor="#F0F0F2"
+        android:textSize="20sp"
+        app:backgroundTint="#2B558C"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toTopOf="@id/llIndicators"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/llIndicators"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="38dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="8dp"
+            app:cardBackgroundColor="#2B558C"
+            app:cardCornerRadius="3dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="36dp"
+            android:layout_height="6dp"
+            app:cardBackgroundColor="#D9D9D9"
+            app:cardCornerRadius="3dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,13 +9,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Registro de Trabajador"
+        android:text="Bienvenido de nuevo"
         android:textSize="28sp"
         android:textStyle="bold"
         android:layout_marginBottom="32dp"/>
 
     <EditText
-        android:id="@+id/etEmail"
+        android:id="@+id/etLoginEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Correo Electrónico"
@@ -25,32 +25,32 @@
         android:background="@android:drawable/edit_text"/>
 
     <EditText
-        android:id="@+id/etPassword"
+        android:id="@+id/etLoginPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Contraseña"
         android:inputType="textPassword"
         android:padding="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@android:drawable/edit_text"/>
-
-    <EditText
-        android:id="@+id/etOficio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="¿Cuál es tu oficio? (Ej: Taxi, Bodega)"
-        android:inputType="text"
-        android:padding="16dp"
         android:layout_marginBottom="32dp"
         android:background="@android:drawable/edit_text"/>
 
     <Button
-        android:id="@+id/btnRegistrar"
+        android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="Crear mi cuenta"
+        android:text="Ingresar"
         android:textSize="16sp"
         android:backgroundTint="#6200EE"
         android:textColor="@android:color/white"/>
+
+    <TextView
+        android:id="@+id/tvIrARegistro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¿No tienes cuenta? Regístrate aquí"
+        android:textColor="#03DAC5"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        android:padding="8dp"/>
 
 </LinearLayout>
