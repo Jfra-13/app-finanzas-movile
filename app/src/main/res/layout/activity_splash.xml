@@ -11,13 +11,15 @@
         android:id="@+id/ivSplashLogo"
         android:layout_width="310dp"
         android:layout_height="310dp"
-        android:src="@drawable/splash_logo"
         android:contentDescription="Logo de la aplicación"
+        android:src="@drawable/splash_logo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4" />
+        app:layout_constraintVertical_bias="0.237" />
+
     <TextView
         android:id="@+id/tvCloudKashTeam"
         android:layout_width="wrap_content"

@@ -16,7 +16,7 @@
         android:theme="@style/Theme.Finanzas_independientes_app">
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".presentation.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,10 +25,18 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:exported="false" />
 
-        <activity android:name=".DashboardActivity" />
+        <activity android:name=".presentation.OnboardingOneActivity" android:exported="false" />
+        <activity android:name=".presentation.OnboardingTwoActivity" android:exported="false" />
+        <activity android:name=".presentation.RegisterActivity" android:exported="false" />
+        <activity android:name=".presentation.ForgotPasswordActivity" android:exported="false" />
+        <activity android:name=".presentation.VerificationActivity" android:exported="false" />
+        <activity android:name=".presentation.NewPasswordActivity" android:exported="false" />
+        <activity android:name=".presentation.SelectBusinessActivity" android:exported="false" />
+
+        <activity android:name=".DashboardActivity" android:exported="false" />
 
     </application>
 

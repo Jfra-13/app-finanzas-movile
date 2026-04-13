@@ -10,7 +10,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.example.finanzas_independientes_app.presentation.ForgotPasswordActivity
 import com.example.finanzas_independientes_app.presentation.LoginViewModel
+import com.example.finanzas_independientes_app.presentation.RegisterActivity
+import com.example.finanzas_independientes_app.presentation.SelectBusinessActivity
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -27,6 +30,7 @@ class LoginActivity : AppCompatActivity() {
         val etPassword = findViewById<EditText>(R.id.etLoginPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val tvIrARegistro = findViewById<TextView>(R.id.tvIrARegistro)
+        val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword) // Nuevo ID del XML
 
         // 1. Al hacer clic en Iniciar Sesión
         btnLogin.setOnClickListener {
@@ -35,13 +39,19 @@ class LoginActivity : AppCompatActivity() {
             viewModel.iniciarSesion(email, pass)
         }
 
-        // 2. Si no tiene cuenta, lo mandamos a la pantalla de Registro (MainActivity)
+        // 2. Navegación a Registro (Actualizado para apuntar a la nueva clase)
         tvIrARegistro.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
 
-        // 3. Observamos los mensajes de error
+        // 3. Navegación a Recuperar Contraseña
+        tvForgotPassword.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 4. Observamos los mensajes de error
         lifecycleScope.launch {
             viewModel.mensajeUI.collect { mensaje ->
                 if (mensaje != null) {
@@ -51,16 +61,23 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // 4. ¡LA MAGIA DE LA MEMORIA! Observamos si el login fue exitoso
+        // 5. ¡LA MAGIA DE LA MEMORIA! Observamos si el login fue exitoso
         lifecycleScope.launch {
             viewModel.loginExitoso.collect { usuarioId ->
                 if (usuarioId != null) {
-                    // Guardamos el ID en la memoria del celular (SharedPreferences)
+                    // Guardamos el ID del usuario
                     val sharedPref = getSharedPreferences("MisFinanzasApp", Context.MODE_PRIVATE)
                     sharedPref.edit().putLong("USUARIO_ID", usuarioId).apply()
 
-                    // Saltamos al Dashboard y cerramos el Login
-                    val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
+                    // PREGUNTAMOS: ¿Ya eligió su negocio en este celular?
+                    val eligioNegocio = sharedPref.getBoolean("ELIGIO_NEGOCIO", false)
+
+                    val intent = if (eligioNegocio) {
+                        Intent(this@LoginActivity, DashboardActivity::class.java)
+                    } else {
+                        Intent(this@LoginActivity, SelectBusinessActivity::class.java)
+                    }
+
                     startActivity(intent)
                     finish()
                 }

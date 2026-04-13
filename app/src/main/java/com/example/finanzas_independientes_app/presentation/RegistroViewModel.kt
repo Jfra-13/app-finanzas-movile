@@ -9,16 +9,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-
 class RegistroViewModel : ViewModel() {
 
-    // Manejador de estados: ¿Cargando?, ¿Éxito?, ¿Error?
     private val _mensajeUI = MutableStateFlow<String?>(null)
     val mensajeUI: StateFlow<String?> = _mensajeUI
 
-    fun registrarUsuario(email: String, pass: String, oficio: String) {
+    // Actualizamos los parámetros para que coincidan con la nueva pantalla
+    fun registrarUsuario(nombre: String, email: String, pass: String, repetirPass: String) {
+
         // 1. Validaciones de QA básicas (Frontend)
-        if (email.isBlank() || pass.isBlank() || oficio.isBlank()) {
+        if (nombre.isBlank() || email.isBlank() || pass.isBlank() || repetirPass.isBlank()) {
             _mensajeUI.value = "Todos los campos son obligatorios"
             return
         }
@@ -26,11 +26,21 @@ class RegistroViewModel : ViewModel() {
             _mensajeUI.value = "Por favor ingresa un correo válido"
             return
         }
+        // NUEVA VALIDACIÓN: Confirmar contraseña
+        if (pass != repetirPass) {
+            _mensajeUI.value = "Las contraseñas no coinciden"
+            return
+        }
+        if (pass.length < 6) {
+            _mensajeUI.value = "La contraseña debe tener al menos 6 caracteres"
+            return
+        }
 
         // 2. Ejecutar la llamada de red en segundo plano
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val dto = UsuarioRegistroDTO(email, pass, oficio)
+                // Creamos el DTO con los datos correctos (Nombre en vez de Oficio)
+                val dto = UsuarioRegistroDTO(nombre, email, pass)
                 val response = RetrofitClient.apiService.registrarUsuario(dto)
 
                 if (response.isSuccessful) {
@@ -44,7 +54,6 @@ class RegistroViewModel : ViewModel() {
         }
     }
 
-    // Función para limpiar el mensaje después de mostrarlo
     fun limpiarMensaje() {
         _mensajeUI.value = null
     }
