@@ -12,5 +12,11 @@
     <style name="CircleImage">
         <item name="cornerSize">50%</item>
     </style>
+    <style name="Widget.App.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="borderWidth">8dp</item>
+        <item name="backgroundTint">#4579BC</item>
+        <item name="tint">#FFFFFF</item>
+        <item name="strokeColor">#F0F0F2</item>
+    </style>
 
 </resources>
