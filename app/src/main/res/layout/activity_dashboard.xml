@@ -489,13 +489,13 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="16dp">
 
-            <ImageView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="26dp" android:layout_weight="1" android:src="@drawable/ic_home" />
-            <ImageView android:id="@+id/navCalendar" android:layout_width="0dp" android:layout_height="26dp" android:layout_weight="1" android:src="@drawable/ic_calendar" />
+            <ImageView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="35dp" android:layout_weight="1" android:src="@drawable/ic_home" />
+            <ImageView android:id="@+id/navCalendar" android:layout_width="0dp" android:layout_height="35dp" android:layout_weight="1" android:src="@drawable/ic_calendar" />
 
             <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1.2" />
 
-            <ImageView android:id="@+id/navStats" android:layout_width="0dp" android:layout_height="26dp" android:layout_weight="1" android:src="@drawable/ic_stats" />
-            <ImageView android:id="@+id/navUser" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:src="@drawable/ic_user" />
+            <ImageView android:id="@+id/navStats" android:layout_width="0dp" android:layout_height="35dp" android:layout_weight="1" android:src="@drawable/ic_stats" />
+            <ImageView android:id="@+id/navUser" android:layout_width="0dp" android:layout_height="45dp" android:layout_weight="1" android:src="@drawable/ic_user" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
