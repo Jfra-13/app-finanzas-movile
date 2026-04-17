@@ -500,11 +500,12 @@
     </com.google.android.material.card.MaterialCardView>
 
     <FrameLayout
-        android:layout_width="68dp"
-        android:layout_height="68dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         app:layout_anchor="@id/bottomNavCard"
         app:layout_anchorGravity="top|center"
-        android:translationY="-10dp"> <com.google.android.material.card.MaterialCardView
+        android:translationY="-10dp"
+        android:elevation="10dp"> <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cardBackgroundColor="#F0F0F2"
@@ -514,8 +515,8 @@
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardFabAdd"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_gravity="center"
             app:cardBackgroundColor="#4579BC"
             app:cardCornerRadius="27dp"

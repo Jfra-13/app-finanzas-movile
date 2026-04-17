@@ -1,3 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">finanzas_independientes_app</string>
+    <string name="app_name">Mi App Financiera</string>
+
+    <!-- Header -->
+    <string name="greeting_morning">Buenos días,</string>
+    <string name="user_name">Jorge Ramirez</string>
+
+    <!-- Metas -->
+    <string name="title_goals_summary">Resumen de metas establecidas</string>
+    <string name="goal_daily">Diario:</string>
+    <string name="goal_weekly">Sem:</string>
+    <string name="goal_monthly">Mens:</string>
+    <string name="currency">S/</string>
+
+    <!-- Progreso Diario -->
+    <string name="title_daily_progress">Progreso diario</string>
+    <string name="label_current">Actual</string>
+    <string name="label_goal">Objetivo</string>
+
+    <!-- Progreso Semanal -->
+    <string name="title_weekly_progress">Tu progreso\nsemanal</string>
+    <string name="status_excellent">Excelente</string>
+
+    <!-- Dinero Acumulado -->
+    <string name="title_accumulated_money">Dinero acumulado</string>
+    <string name="label_goal_money">Objetivo:</string>
+    <string name="currency_label">Soles</string>
+
+    <!-- Días de la Semana -->
+    <string name="day_monday">Lu</string>
+    <string name="day_tuesday">Mar</string>
+    <string name="day_wednesday">Mie</string>
+    <string name="day_thursday">Jue</string>
+    <string name="day_friday">Vie</string>
+    <string name="day_saturday">Sab</string>
+    <string name="day_sunday">Dom</string>
+
+    <!-- Navegación -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_calendar">Calendario</string>
+    <string name="nav_stats">Estadísticas</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="fab_add">Añadir transacción</string>
+    <string name="menu_options">Más opciones</string>
+
+    <!-- Accesibilidad -->
+    <string name="content_desc_user_photo">Foto de perfil del usuario</string>
+    <string name="content_desc_menu">Abrir menú</string>
+    <string name="content_desc_daily_progress">Progreso diario: %1$d por ciento</string>
+    <string name="content_desc_weekly_progress">Progreso semanal: %1$d por ciento</string>
+    <string name="content_desc_chart_day">Gráfico de ingresos y gastos para %1$s</string>
+
+    <!-- Mensajes -->
+    <string name="message_goal_reached">¡Felicidades! Alcanzaste tu meta diaria</string>
+    <string name="message_good_progress">Vas muy bien esta semana</string>
 </resources>

@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Colores Primarios -->
+    <color name="primary_blue">#4579BC</color>
+    <color name="primary_blue_dark">#2B558C</color>
+    <color name="primary_blue_light">#A0C3D9</color>
+
+    <!-- Colores Secundarios -->
+    <color name="background_light">#F0F0F2</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- Grises (Textos) -->
+    <color name="text_primary">#222222</color>
+    <color name="text_secondary">#555555</color>
+    <color name="text_hint">#888888</color>
+    <color name="text_light">#AAAAAA</color>
+
+    <!-- Colores para Gráficos -->
+    <color name="chart_bar_income">#4579BC</color>
+    <color name="chart_bar_expense">#CCCCCC</color>
+
+    <!-- Estados -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFC107</color>
+    <color name="error">#F44336</color>
 </resources>
