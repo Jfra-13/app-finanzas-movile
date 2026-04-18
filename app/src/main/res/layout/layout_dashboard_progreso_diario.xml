@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardProgresoDiario"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="160dp"
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
@@ -23,19 +23,21 @@
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+
             <ImageView
                 android:id="@+id/ivDiarioIcon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="23dp"
+                android:layout_height="23dp"
                 android:layout_marginEnd="6dp"
                 android:src="@drawable/ic_power_full_b" />
+
             <TextView
                 android:id="@+id/tvProgresoTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Progreso diario"
                 android:textColor="@color/blue_primary"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -43,9 +45,11 @@
             android:id="@+id/tvProgresoPorcentaje"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
             android:text="100%"
             android:textColor="@color/blue_primary"
-            android:textSize="36sp"
+            android:textSize="45sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llDiarioStatus" />
@@ -87,7 +91,7 @@
             app:layout_constraintEnd_toEndOf="@id/flSemicircle"
             app:layout_constraintStart_toStartOf="@id/flSemicircle"
             app:layout_constraintBottom_toTopOf="@id/viewDivider">
-            <TextView android:id="@+id/tvMontoActual" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="350" android:textColor="@color/blue_primary" android:textSize="28sp" android:textStyle="bold" />
+            <TextView android:id="@+id/tvMontoActual" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="350" android:textColor="@color/blue_primary" android:textSize="30sp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp" android:text=" S/." android:textColor="@color/blue_dark" android:textSize="12sp" />
         </LinearLayout>
 
@@ -108,7 +112,7 @@
             app:layout_constraintEnd_toEndOf="@id/flSemicircle"
             app:layout_constraintStart_toStartOf="@id/flSemicircle"
             app:layout_constraintTop_toBottomOf="@id/viewDivider">
-            <TextView android:id="@+id/tvMontoObjetivo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="350" android:textColor="@color/blue_primary" android:textSize="14sp" />
+            <TextView android:id="@+id/tvMontoObjetivo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="350" android:textColor="@color/blue_primary" android:textSize="14sp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="2dp" android:text=" S/." android:textColor="@color/text_gray" android:textSize="10sp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

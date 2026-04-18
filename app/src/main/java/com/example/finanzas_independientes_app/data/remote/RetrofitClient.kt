@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
 
     // BORRA LA LÍNEA ANTIGUA:
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    private const val BASE_URL = "http://10.0.2.2:9090/"
 
     // PON TU NUEVA URL DE PRODUCCIÓN:
     // private const val BASE_URL = "https://businesscontrol.azurewebsites.net/"

@@ -4,6 +4,7 @@ import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
 import com.example.finanzas_independientes_app.data.remote.dto.TransaccionRegistroDTO
 import com.example.finanzas_independientes_app.data.remote.dto.UsuarioRegistroDTO
 import retrofit2.Response
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -13,8 +14,7 @@ import retrofit2.http.Query
 interface FinanzasApi {
 
     @POST("/api/v1/usuarios/registro")
-    suspend fun registrarUsuario(@Body usuario: UsuarioRegistroDTO): Response<Unit>
-
+    suspend fun registrarUsuario(@Body usuario: UsuarioRegistroDTO): Response<ResponseBody>
     @POST("/api/v1/usuarios/login")
     suspend fun iniciarSesion(@Body request: LoginDTO): Response<Long>
 
