@@ -49,9 +49,9 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 | Fase | Nombre | Foco | Bloquea a |
 |---|---|---|---|
-| 0 | Cimientos técnicos | Refactor de estructura, version catalog, ViewBinding, limpieza | Todas |
-| 1 | Núcleo de red | Envelope, modelo de errores por `code`, interceptores | 2–5 |
-| 2 | Autenticación y sesión | JWT, refresh rotativo, almacenamiento seguro, `SessionManager` | 4–5 |
+| 0 ✅ | Cimientos técnicos | Refactor de estructura, version catalog, ViewBinding, limpieza | Todas |
+| 1 ✅ | Núcleo de red | Envelope, modelo de errores por `code`, interceptores | 2–5 |
+| 2 ✅ | Autenticación y sesión | JWT, refresh rotativo, almacenamiento seguro, `SessionManager` | 4–5 |
 | 3 | Dominio y repositories | Modelos de negocio, `AuthRepository`, `FinanzasRepository`, DI | 4–5 |
 | 4 | Features funcionales | Auth completo, dashboard real, transacciones, metas, categorías | 5–6 |
 | 5 | Analíticas y visualización | Gráficos (semanal, tendencia, categorías), salud financiera | 6 |
@@ -156,6 +156,12 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 3. **Transacciones:** alta (ingreso/egreso, descripción, fecha, categoría), historial paginado (`GET /transacciones`), edición (`PUT`), borrado (`DELETE`). Manejo de `403 ACCESO_DENEGADO` y `404`.
 4. **Metas:** fijar/editar meta del mes (`POST /metas`) y leer la activa (`GET /metas/actual`, con `404 META_NO_ENCONTRADA` → invitar a crear meta).
 5. **Categorías:** listar base + propias (`GET /categorias`), crear propia (`POST /categorias`).
+
+> **Heredado de Fase 2 (infra lista, falta cablear presentación):** las Fases 1–2 dejaron la API, los DTOs y los interceptores listos, pero estas piezas de UI quedaron pendientes y se cierran acá:
+> - Cablear las pantallas `forgot-password` → `verify-otp` → `reset-password` a los endpoints nuevos (`forgotPassword`/`verifyOtp`/`resetPassword` ya existen en `FinanzasApi`), ramificando por `OTP_INVALIDO`/`OTP_EXPIRADO`/`OTP_BLOQUEADO`.
+> - Migrar `SelectBusinessActivity` a `PUT /me/negocio` (`actualizarNegocio`) y actualizar `tipoNegocio` en `SessionManager`; reemplazar el flag plano `ELIGIO_NEGOCIO` que aún lee el Splash.
+> - Quitar el hardcode `meta=3000`/`dias=10` de `DashboardViewModel` y usar la meta persistida.
+> - Quitar el parámetro transitorio `usuarioId` de `DashboardViewModel.cargarCuotaDiaria`/`registrarIngreso` (la identidad ya viaja en el JWT).
 
 **Definition of Done:**
 - Cada pantalla maneja éxito, vacío, carga y error (por `code`).
