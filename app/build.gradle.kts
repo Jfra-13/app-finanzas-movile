@@ -21,12 +21,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:9090/\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://businesscontrol.azurewebsites.net/\"")
         }
     }
     compileOptions {
@@ -35,6 +39,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -50,7 +55,14 @@ dependencies {
     // Retrofit y Gson para la red
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
+    // OkHttp: cliente, logging e interceptores (BOM alinea versiones)
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    // Almacenamiento seguro de tokens (EncryptedSharedPreferences)
+    implementation(libs.androidx.security.crypto)
     // Librerías para ViewModel y viewModelScope
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
