@@ -38,6 +38,8 @@
         <activity android:name=".presentation.business.SelectBusinessActivity" android:exported="false" />
 
         <activity android:name=".presentation.dashboard.DashboardActivity" android:exported="false" />
+        <activity android:name=".presentation.transacciones.TransaccionesActivity" android:exported="false" />
+        <activity android:name=".presentation.categorias.CategoriasActivity" android:exported="false" />
 
     </application>
 
