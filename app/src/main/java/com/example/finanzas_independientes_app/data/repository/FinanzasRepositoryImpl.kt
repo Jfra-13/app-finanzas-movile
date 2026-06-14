@@ -1,8 +1,15 @@
 package com.example.finanzas_independientes_app.data.repository
 
+import com.example.finanzas_independientes_app.core.network.ApiCode
 import com.example.finanzas_independientes_app.core.network.ApiResult
+import com.example.finanzas_independientes_app.core.network.AppError
 import com.example.finanzas_independientes_app.core.network.safeApiCall
 import com.example.finanzas_independientes_app.core.network.safeUnitCall
+import com.example.finanzas_independientes_app.data.local.dao.CategoriaDao
+import com.example.finanzas_independientes_app.data.local.dao.MetaDao
+import com.example.finanzas_independientes_app.data.local.dao.TransaccionDao
+import com.example.finanzas_independientes_app.data.local.entity.toDomain
+import com.example.finanzas_independientes_app.data.local.entity.toEntity
 import com.example.finanzas_independientes_app.data.mapper.toDomain
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
 import com.example.finanzas_independientes_app.data.remote.dto.CategoriaRequest
@@ -23,7 +30,10 @@ import javax.inject.Singleton
 @Singleton
 class FinanzasRepositoryImpl @Inject constructor(
     private val api: FinanzasApi,
-    private val gson: Gson
+    private val gson: Gson,
+    private val transaccionDao: TransaccionDao,
+    private val categoriaDao: CategoriaDao,
+    private val metaDao: MetaDao
 ) : FinanzasRepository {
 
     // --- Transactions ---
@@ -49,8 +59,40 @@ class FinanzasRepositoryImpl @Inject constructor(
             api.listarTransacciones(tipo, categoriaId, page, size, sort)
         }
         return when (result) {
-            is ApiResult.Success -> ApiResult.Success(result.data.toDomain(), result.code)
-            is ApiResult.Error -> result
+            is ApiResult.Success -> {
+                val paginated = result.data.toDomain()
+                // Cache only the unfiltered first page as the offline snapshot.
+                if (page == 0 && tipo == null && categoriaId == null) {
+                    transaccionDao.replaceAll(paginated.content.map { it.toEntity() })
+                }
+                ApiResult.Success(paginated, result.code)
+            }
+            is ApiResult.Error -> {
+                // Offline fallback: serve the cached first page when the network is down.
+                if (result.error is AppError.Network &&
+                    page == 0 && tipo == null && categoriaId == null
+                ) {
+                    val cached = transaccionDao.getAll().map { it.toDomain() }
+                    if (cached.isNotEmpty()) {
+                        ApiResult.Success(
+                            PaginatedTransacciones(
+                                content = cached,
+                                totalElements = cached.size.toLong(),
+                                totalPages = 1,
+                                number = 0,
+                                size = cached.size,
+                                first = true,
+                                last = true
+                            ),
+                            ApiCode.TRANSACTIONS_OK
+                        )
+                    } else {
+                        result
+                    }
+                } else {
+                    result
+                }
+            }
         }
     }
 
@@ -112,8 +154,19 @@ class FinanzasRepositoryImpl @Inject constructor(
     override suspend fun obtenerMetaActual(): ApiResult<Meta> {
         val result = safeApiCall(gson) { api.obtenerMetaActual() }
         return when (result) {
-            is ApiResult.Success -> ApiResult.Success(result.data.toDomain(), result.code)
-            is ApiResult.Error -> result
+            is ApiResult.Success -> {
+                val meta = result.data.toDomain()
+                metaDao.replaceActiva(meta.toEntity())
+                ApiResult.Success(meta, result.code)
+            }
+            is ApiResult.Error -> {
+                if (result.error is AppError.Network) {
+                    val cached = metaDao.getActiva()?.toDomain()
+                    if (cached != null) ApiResult.Success(cached, ApiCode.GOAL_OK) else result
+                } else {
+                    result
+                }
+            }
         }
     }
 
@@ -122,8 +175,19 @@ class FinanzasRepositoryImpl @Inject constructor(
     override suspend fun listarCategorias(): ApiResult<List<Categoria>> {
         val result = safeApiCall(gson) { api.listarCategorias() }
         return when (result) {
-            is ApiResult.Success -> ApiResult.Success(result.data.map { it.toDomain() }, result.code)
-            is ApiResult.Error -> result
+            is ApiResult.Success -> {
+                val categorias = result.data.map { it.toDomain() }
+                categoriaDao.replaceAll(categorias.map { it.toEntity() })
+                ApiResult.Success(categorias, result.code)
+            }
+            is ApiResult.Error -> {
+                if (result.error is AppError.Network) {
+                    val cached = categoriaDao.getAll().map { it.toDomain() }
+                    if (cached.isNotEmpty()) ApiResult.Success(cached, ApiCode.CATEGORIES_OK) else result
+                } else {
+                    result
+                }
+            }
         }
     }
 

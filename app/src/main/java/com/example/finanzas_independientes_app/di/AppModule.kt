@@ -48,6 +48,7 @@ object AppModule {
     ): FinanzasApi = NetworkModule.provideApi(
         gson = gson,
         session = session,
+        cacheDir = context.cacheDir,
         onSessionExpired = { redirectToLogin(context) }
     )
 

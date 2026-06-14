@@ -4,10 +4,12 @@ import com.example.finanzas_independientes_app.BuildConfig
 import com.example.finanzas_independientes_app.core.session.SessionManager
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
 import com.google.gson.Gson
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
@@ -18,12 +20,14 @@ import java.util.concurrent.TimeUnit
 object NetworkModule {
 
     private const val TIMEOUT_SECONDS = 30L
+    private const val HTTP_CACHE_SIZE_BYTES = 10L * 1024 * 1024 // 10 MB
 
     fun provideGson(): Gson = Gson()
 
     fun provideApi(
         gson: Gson,
         session: SessionManager,
+        cacheDir: File,
         onSessionExpired: () -> Unit
     ): FinanzasApi {
         val logging = HttpLoggingInterceptor().apply {
@@ -39,7 +43,9 @@ object NetworkModule {
         val refreshApi = retrofit(refreshClient, gson).create(RefreshApi::class.java)
         val authenticator = TokenAuthenticator(session, refreshApi, onSessionExpired)
 
+        val httpCache = Cache(File(cacheDir, "http_cache"), HTTP_CACHE_SIZE_BYTES)
         val mainClient = baseClientBuilder(logging)
+            .cache(httpCache)
             .addInterceptor(AuthInterceptor(session))
             .authenticator(authenticator)
             .build()

@@ -16,6 +16,14 @@
 
     <style name="Theme.Finanzas_independientes_app" parent="Base.Theme.Finanzas_independientes_app" />
 
+    <!-- Cold-start splash via the Splash Screen API (Fase 7). Hands off to the
+         main theme once the launcher activity is ready. -->
+    <style name="Theme.App.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/blue_primary</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Finanzas_independientes_app</item>
+    </style>
+
     <!-- Shape tokens -->
     <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerSize">8dp</item>

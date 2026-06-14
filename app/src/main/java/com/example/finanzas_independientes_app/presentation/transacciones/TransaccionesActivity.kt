@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.finanzas_independientes_app.R
 import com.example.finanzas_independientes_app.databinding.ActivityTransaccionesBinding
 import com.example.finanzas_independientes_app.databinding.DialogEditTransactionBinding
@@ -21,6 +22,11 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class TransaccionesActivity : AppCompatActivity() {
+
+    companion object {
+        // Trigger the next-page load when this many rows remain below the fold.
+        private const val PREFETCH_THRESHOLD = 4
+    }
 
     private lateinit var binding: ActivityTransaccionesBinding
     private val viewModel: TransaccionesViewModel by lazy {
@@ -52,8 +58,23 @@ class TransaccionesActivity : AppCompatActivity() {
             onEdit = { transaccion -> showEditDialog(transaccion) },
             onDelete = { transaccion -> showDeleteConfirmation(transaccion) }
         )
-        binding.rvTransacciones.layoutManager = LinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(this)
+        binding.rvTransacciones.layoutManager = layoutManager
         binding.rvTransacciones.adapter = adapter
+        binding.rvTransacciones.setHasFixedSize(true)
+
+        // Infinite scroll: prefetch the next page before the user hits the bottom.
+        binding.rvTransacciones.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                if (dy <= 0) return
+                val visibleItems = layoutManager.childCount
+                val totalItems = layoutManager.itemCount
+                val firstVisible = layoutManager.findFirstVisibleItemPosition()
+                if (firstVisible + visibleItems >= totalItems - PREFETCH_THRESHOLD) {
+                    viewModel.cargarMas()
+                }
+            }
+        })
     }
 
     private fun bindFlows() {
