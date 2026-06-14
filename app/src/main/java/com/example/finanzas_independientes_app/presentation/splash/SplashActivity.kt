@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.example.finanzas_independientes_app.databinding.ActivitySplashBinding
+import com.example.finanzas_independientes_app.di.ServiceLocator
 import com.example.finanzas_independientes_app.presentation.auth.LoginActivity
 import com.example.finanzas_independientes_app.presentation.business.SelectBusinessActivity
 import com.example.finanzas_independientes_app.presentation.dashboard.DashboardActivity
@@ -24,14 +25,14 @@ class SplashActivity : AppCompatActivity() {
         // Esperamos 2 segundos y decidimos a dónde ir
         Handler(Looper.getMainLooper()).postDelayed({
 
-            // Abrimos la memoria del celular
+            // Onboarding/negocio son flags de UX (no sensibles); la sesión real
+            // (token JWT) vive cifrada en SessionManager.
             val sharedPref = getSharedPreferences("MisFinanzasApp", Context.MODE_PRIVATE)
-            val usuarioId = sharedPref.getLong("USUARIO_ID", -1L)
             val vioOnboarding = sharedPref.getBoolean("VIO_ONBOARDING", false)
-            val eligioNegocio = sharedPref.getBoolean("ELIGIO_NEGOCIO", false) // NUEVO
+            val eligioNegocio = sharedPref.getBoolean("ELIGIO_NEGOCIO", false)
 
-            val intent = if (usuarioId != -1L) {
-                // CASO 1: Está logueado. ¿Tiene negocio?
+            val intent = if (ServiceLocator.sessionManager.isLoggedIn()) {
+                // CASO 1: Sesión válida (token presente). ¿Tiene negocio?
                 if (eligioNegocio) {
                     Intent(this, DashboardActivity::class.java)
                 } else {

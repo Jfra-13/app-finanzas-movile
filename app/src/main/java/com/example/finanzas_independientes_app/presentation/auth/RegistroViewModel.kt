@@ -2,14 +2,19 @@ package com.example.finanzas_independientes_app.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.finanzas_independientes_app.data.remote.RetrofitClient
+import com.example.finanzas_independientes_app.core.network.ApiResult
+import com.example.finanzas_independientes_app.core.network.safeUnitCall
+import com.example.finanzas_independientes_app.core.network.toUserMessage
 import com.example.finanzas_independientes_app.data.remote.dto.UsuarioRegistroDTO
-import kotlinx.coroutines.Dispatchers
+import com.example.finanzas_independientes_app.di.ServiceLocator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class RegistroViewModel : ViewModel() {
+
+    private val api = ServiceLocator.api
+    private val gson = ServiceLocator.gson
 
     private val _mensajeUI = MutableStateFlow<String?>(null)
     val mensajeUI: StateFlow<String?> = _mensajeUI
@@ -39,27 +44,15 @@ class RegistroViewModel : ViewModel() {
             return
         }
 
-        // 2. Ejecutar la llamada de red en segundo plano
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                // Creamos el DTO con una sola contraseña
-                val dto = UsuarioRegistroDTO(nombre, email, pass)
-                val response = RetrofitClient.apiService.registrarUsuario(dto)
-
-                if (response.isSuccessful) {
-                    // EXITO: Leemos el texto de tu Spring Boot ("¡Usuario registrado con exito!")
-                    val mensajeServidor = response.body()?.string() ?: "¡Cuenta creada con éxito!"
-                    _mensajeUI.value = mensajeServidor
-
-                    // 👇 ¡La magia! Le avisamos a la vista que el registro terminó
+        // 2. Ejecutar la llamada de red
+        viewModelScope.launch {
+            val dto = UsuarioRegistroDTO(nombre, email, pass)
+            when (val result = safeUnitCall(gson) { api.registrar(dto) }) {
+                is ApiResult.Success -> {
+                    _mensajeUI.value = "¡Cuenta creada con éxito!"
                     _registroExitoso.value = true
-                } else {
-                    // ERROR 400: Leemos por qué Spring Boot lo rechazó ("El email ya está registrado")
-                    val errorReal = response.errorBody()?.string() ?: "Error del servidor: ${response.code()}"
-                    _mensajeUI.value = errorReal
                 }
-            } catch (e: Exception) {
-                _mensajeUI.value = "Error de red: No se pudo conectar al servidor."
+                is ApiResult.Error -> _mensajeUI.value = result.error.toUserMessage()
             }
         }
     }

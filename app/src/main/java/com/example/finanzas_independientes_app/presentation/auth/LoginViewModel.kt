@@ -2,14 +2,20 @@ package com.example.finanzas_independientes_app.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.finanzas_independientes_app.data.remote.RetrofitClient
+import com.example.finanzas_independientes_app.core.network.ApiResult
+import com.example.finanzas_independientes_app.core.network.safeApiCall
+import com.example.finanzas_independientes_app.core.network.toUserMessage
 import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
-import kotlinx.coroutines.Dispatchers
+import com.example.finanzas_independientes_app.di.ServiceLocator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
+
+    private val api = ServiceLocator.api
+    private val session = ServiceLocator.sessionManager
+    private val gson = ServiceLocator.gson
 
     // Mensajes de error o validación
     private val _mensajeUI = MutableStateFlow<String?>(null)
@@ -25,18 +31,13 @@ class LoginViewModel : ViewModel() {
             return
         }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val response = RetrofitClient.apiService.iniciarSesion(LoginDTO(email, pass))
-
-                if (response.isSuccessful && response.body() != null) {
-                    // ¡Éxito! El servidor nos devolvió el ID real del usuario
-                    _loginExitoso.value = response.body()
-                } else {
-                    _mensajeUI.value = "Credenciales incorrectas"
+        viewModelScope.launch {
+            when (val result = safeApiCall(gson) { api.login(LoginDTO(email, pass)) }) {
+                is ApiResult.Success -> {
+                    session.saveSession(result.data)
+                    _loginExitoso.value = result.data.usuarioId
                 }
-            } catch (e: Exception) {
-                _mensajeUI.value = "Error al conectar con el servidor"
+                is ApiResult.Error -> _mensajeUI.value = result.error.toUserMessage()
             }
         }
     }
