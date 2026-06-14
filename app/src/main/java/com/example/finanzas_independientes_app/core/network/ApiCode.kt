@@ -1,0 +1,65 @@
+package com.example.finanzas_independientes_app.core.network
+
+/**
+ * Canonical catalog of backend `code` values. The client branches on these,
+ * never on human-facing messages. Unknown server codes map to [UNKNOWN] so a
+ * new backend code never crashes the client.
+ */
+enum class ApiCode(val raw: String) {
+    // --- Success: auth ---
+    LOGIN_SUCCESS("LOGIN_SUCCESS"),
+    USER_REGISTERED("USER_REGISTERED"),
+    TOKEN_REFRESHED("TOKEN_REFRESHED"),
+    OTP_SENT("OTP_SENT"),
+    OTP_VERIFIED("OTP_VERIFIED"),
+    PASSWORD_RESET_SUCCESS("PASSWORD_RESET_SUCCESS"),
+    BUSINESS_UPDATED("BUSINESS_UPDATED"),
+
+    // --- Success: finanzas ---
+    TRANSACTION_CREATED("TRANSACTION_CREATED"),
+    TRANSACTIONS_OK("TRANSACTIONS_OK"),
+    TRANSACTION_UPDATED("TRANSACTION_UPDATED"),
+    TRANSACTION_DELETED("TRANSACTION_DELETED"),
+    TODAY_INCOME_OK("TODAY_INCOME_OK"),
+    DAILY_QUOTA_OK("DAILY_QUOTA_OK"),
+    WEEKLY_SUMMARY_OK("WEEKLY_SUMMARY_OK"),
+    GOALS_PROGRESS_OK("GOALS_PROGRESS_OK"),
+    GOAL_SET("GOAL_SET"),
+    GOAL_OK("GOAL_OK"),
+    CATEGORIES_OK("CATEGORIES_OK"),
+    CATEGORY_CREATED("CATEGORY_CREATED"),
+    CATEGORY_SUMMARY_OK("CATEGORY_SUMMARY_OK"),
+    MONTHLY_TREND_OK("MONTHLY_TREND_OK"),
+    FINANCIAL_HEALTH_OK("FINANCIAL_HEALTH_OK"),
+
+    // --- Financial health signals (nested in data) ---
+    GASTO_DIARIO_ALTO("GASTO_DIARIO_ALTO"),
+    META_CERCA("META_CERCA"),
+    META_EN_RIESGO("META_EN_RIESGO"),
+
+    // --- Errors ---
+    VALIDATION_ERROR("VALIDATION_ERROR"),
+    MALFORMED_JSON("MALFORMED_JSON"),
+    UNAUTHORIZED("UNAUTHORIZED"),
+    REFRESH_TOKEN_INVALIDO("REFRESH_TOKEN_INVALIDO"),
+    FORBIDDEN("FORBIDDEN"),
+    ACCESO_DENEGADO("ACCESO_DENEGADO"),
+    USUARIO_NO_ENCONTRADO("USUARIO_NO_ENCONTRADO"),
+    TRANSACCION_NO_ENCONTRADA("TRANSACCION_NO_ENCONTRADA"),
+    META_NO_ENCONTRADA("META_NO_ENCONTRADA"),
+    CATEGORIA_NO_ENCONTRADA("CATEGORIA_NO_ENCONTRADA"),
+    EMAIL_DUPLICADO("EMAIL_DUPLICADO"),
+    OTP_INVALIDO("OTP_INVALIDO"),
+    OTP_EXPIRADO("OTP_EXPIRADO"),
+    OTP_BLOQUEADO("OTP_BLOQUEADO"),
+    INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR"),
+
+    /** Fallback for any code not yet modeled here. */
+    UNKNOWN("UNKNOWN");
+
+    companion object {
+        private val byRaw = entries.associateBy { it.raw }
+
+        fun from(raw: String?): ApiCode = byRaw[raw] ?: UNKNOWN
+    }
+}
