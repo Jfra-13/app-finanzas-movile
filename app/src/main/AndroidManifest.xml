@@ -16,7 +16,7 @@
         android:theme="@style/Theme.Finanzas_independientes_app">
 
         <activity
-            android:name=".presentation.SplashActivity"
+            android:name=".presentation.splash.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,18 +25,18 @@
         </activity>
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".presentation.auth.LoginActivity"
             android:exported="false" />
 
-        <activity android:name=".presentation.OnboardingOneActivity" android:exported="false" />
-        <activity android:name=".presentation.OnboardingTwoActivity" android:exported="false" />
-        <activity android:name=".presentation.RegisterActivity" android:exported="false" />
-        <activity android:name=".presentation.ForgotPasswordActivity" android:exported="false" />
-        <activity android:name=".presentation.VerificationActivity" android:exported="false" />
-        <activity android:name=".presentation.NewPasswordActivity" android:exported="false" />
-        <activity android:name=".presentation.SelectBusinessActivity" android:exported="false" />
+        <activity android:name=".presentation.onboarding.OnboardingOneActivity" android:exported="false" />
+        <activity android:name=".presentation.onboarding.OnboardingTwoActivity" android:exported="false" />
+        <activity android:name=".presentation.auth.RegisterActivity" android:exported="false" />
+        <activity android:name=".presentation.auth.ForgotPasswordActivity" android:exported="false" />
+        <activity android:name=".presentation.auth.VerificationActivity" android:exported="false" />
+        <activity android:name=".presentation.auth.NewPasswordActivity" android:exported="false" />
+        <activity android:name=".presentation.business.SelectBusinessActivity" android:exported="false" />
 
-        <activity android:name=".DashboardActivity" android:exported="false" />
+        <activity android:name=".presentation.dashboard.DashboardActivity" android:exported="false" />
 
     </application>
 

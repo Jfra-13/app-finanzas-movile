@@ -1,24 +1,21 @@
-package com.example.finanzas_independientes_app.presentation
+package com.example.finanzas_independientes_app.presentation.business
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.finanzas_independientes_app.DashboardActivity
-import com.example.finanzas_independientes_app.R
-import com.google.android.material.card.MaterialCardView
+import com.example.finanzas_independientes_app.databinding.ActivitySelectBusinessBinding
+import com.example.finanzas_independientes_app.presentation.dashboard.DashboardActivity
 
 class SelectBusinessActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivitySelectBusinessBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_select_business)
-
-        val cardBodega = findViewById<MaterialCardView>(R.id.cardBodega)
-        val cardTaxi = findViewById<MaterialCardView>(R.id.cardTaxi)
-        val cardServicios = findViewById<MaterialCardView>(R.id.cardServicios)
-        val cardPersonalizado = findViewById<MaterialCardView>(R.id.cardPersonalizado)
+        binding = ActivitySelectBusinessBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Función que se ejecutará al elegir cualquier tarjeta
         val onBusinessSelected = { negocio: String ->
@@ -36,9 +33,9 @@ class SelectBusinessActivity : AppCompatActivity() {
         }
 
         // Asignamos los clics a las tarjetas
-        cardBodega.setOnClickListener { onBusinessSelected("Bodega") }
-        cardTaxi.setOnClickListener { onBusinessSelected("Taxi") }
-        cardServicios.setOnClickListener { onBusinessSelected("Servicios") }
-        cardPersonalizado.setOnClickListener { onBusinessSelected("Personalizado") }
+        binding.cardBodega.setOnClickListener { onBusinessSelected("Bodega") }
+        binding.cardTaxi.setOnClickListener { onBusinessSelected("Taxi") }
+        binding.cardServicios.setOnClickListener { onBusinessSelected("Servicios") }
+        binding.cardPersonalizado.setOnClickListener { onBusinessSelected("Personalizado") }
     }
 }

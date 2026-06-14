@@ -1,43 +1,34 @@
-package com.example.finanzas_independientes_app.presentation
+package com.example.finanzas_independientes_app.presentation.auth
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.finanzas_independientes_app.R
+import com.example.finanzas_independientes_app.databinding.ActivityRegisterBinding
 import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityRegisterBinding
     private lateinit var viewModel: RegistroViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
 
-        // 1. Enlazamos TODOS los campos del nuevo XML
-        val ivBack = findViewById<ImageView>(R.id.ivBackArrow)
-        val etNombre = findViewById<EditText>(R.id.etRegisterName)
-        val etEmail = findViewById<EditText>(R.id.etEmail)
-        val etPassword = findViewById<EditText>(R.id.etPassword)
-        val etRepeatPassword = findViewById<EditText>(R.id.etRegisterRepeatPassword)
-        val btnRegistrar = findViewById<Button>(R.id.btnRegistrar)
-
         // 2. Botón de retroceso
-        ivBack.setOnClickListener { finish() }
+        binding.ivBackArrow.setOnClickListener { finish() }
 
         // 3. Capturamos los datos y los enviamos al ViewModel
-        btnRegistrar.setOnClickListener {
-            val nombre = etNombre.text.toString()
-            val email = etEmail.text.toString()
-            val pass = etPassword.text.toString()
-            val repeatPass = etRepeatPassword.text.toString()
+        binding.btnRegistrar.setOnClickListener {
+            val nombre = binding.etRegisterName.text.toString()
+            val email = binding.etEmail.text.toString()
+            val pass = binding.etPassword.text.toString()
+            val repeatPass = binding.etRegisterRepeatPassword.text.toString()
 
             // Le pasamos los 4 datos exactos que espera el cerebro
             viewModel.registrarUsuario(nombre, email, pass, repeatPass)

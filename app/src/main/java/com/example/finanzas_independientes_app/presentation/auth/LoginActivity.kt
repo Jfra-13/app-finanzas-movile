@@ -1,52 +1,44 @@
-package com.example.finanzas_independientes_app
+package com.example.finanzas_independientes_app.presentation.auth
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.finanzas_independientes_app.presentation.ForgotPasswordActivity
-import com.example.finanzas_independientes_app.presentation.LoginViewModel
-import com.example.finanzas_independientes_app.presentation.RegisterActivity
-import com.example.finanzas_independientes_app.presentation.SelectBusinessActivity
+import com.example.finanzas_independientes_app.databinding.ActivityLoginBinding
+import com.example.finanzas_independientes_app.presentation.business.SelectBusinessActivity
+import com.example.finanzas_independientes_app.presentation.dashboard.DashboardActivity
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityLoginBinding
     private lateinit var viewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
 
-        val etEmail = findViewById<EditText>(R.id.etLoginEmail)
-        val etPassword = findViewById<EditText>(R.id.etLoginPassword)
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val tvIrARegistro = findViewById<TextView>(R.id.tvIrARegistro)
-        val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword) // Nuevo ID del XML
-
         // 1. Al hacer clic en Iniciar Sesión
-        btnLogin.setOnClickListener {
-            val email = etEmail.text.toString()
-            val pass = etPassword.text.toString()
+        binding.btnLogin.setOnClickListener {
+            val email = binding.etLoginEmail.text.toString()
+            val pass = binding.etLoginPassword.text.toString()
             viewModel.iniciarSesion(email, pass)
         }
 
         // 2. Navegación a Registro (Actualizado para apuntar a la nueva clase)
-        tvIrARegistro.setOnClickListener {
+        binding.tvIrARegistro.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
 
         // 3. Navegación a Recuperar Contraseña
-        tvForgotPassword.setOnClickListener {
+        binding.tvForgotPassword.setOnClickListener {
             val intent = Intent(this, ForgotPasswordActivity::class.java)
             startActivity(intent)
         }

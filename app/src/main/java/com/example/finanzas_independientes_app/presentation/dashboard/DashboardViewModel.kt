@@ -1,4 +1,4 @@
-package com.example.finanzas_independientes_app.presentation
+package com.example.finanzas_independientes_app.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,32 +1,32 @@
-package com.example.finanzas_independientes_app
+package com.example.finanzas_independientes_app.presentation.dashboard
 
 import android.content.Context
 import android.os.Bundle
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.finanzas_independientes_app.presentation.DashboardViewModel
-import com.google.android.material.card.MaterialCardView
+import com.example.finanzas_independientes_app.databinding.ActivityDashboardBinding
 import kotlinx.coroutines.launch
 
 class DashboardActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityDashboardBinding
     private lateinit var viewModel: DashboardViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dashboard)
+        binding = ActivityDashboardBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this)[DashboardViewModel::class.java]
 
         // 1. CONECTAMOS CON LOS NUEVOS IDs DE TU DISEÑO MODULAR
-        // Este es el número gigante dentro de tu gráfico semicircular
-        val tvMontoActual = findViewById<TextView>(R.id.tvMontoActual)
+        // El número gigante vive dentro del parcial de progreso diario (include con id)
+        val tvMontoActual = binding.incProgresoDiario.tvMontoActual
 
-        // Este es tu nuevo y flamante botón flotante "+"
-        val btnAgregar = findViewById<MaterialCardView>(R.id.cardFabAdd)
+        // El botón flotante "+" vive en el parcial de la barra inferior
+        val btnAgregar = binding.incBottomNav.cardFabAdd
 
         // 2. Leemos el ID guardado en la memoria del celular
         val sharedPref = getSharedPreferences("MisFinanzasApp", Context.MODE_PRIVATE)

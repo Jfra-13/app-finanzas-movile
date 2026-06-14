@@ -1,4 +1,4 @@
-package com.example.finanzas_independientes_app.presentation
+package com.example.finanzas_independientes_app.presentation.splash
 
 import android.content.Context
 import android.content.Intent
@@ -6,14 +6,20 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import com.example.finanzas_independientes_app.DashboardActivity
-import com.example.finanzas_independientes_app.LoginActivity
-import com.example.finanzas_independientes_app.R
+import com.example.finanzas_independientes_app.databinding.ActivitySplashBinding
+import com.example.finanzas_independientes_app.presentation.auth.LoginActivity
+import com.example.finanzas_independientes_app.presentation.business.SelectBusinessActivity
+import com.example.finanzas_independientes_app.presentation.dashboard.DashboardActivity
+import com.example.finanzas_independientes_app.presentation.onboarding.OnboardingOneActivity
 
 class SplashActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivitySplashBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+        binding = ActivitySplashBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Esperamos 2 segundos y decidimos a dónde ir
         Handler(Looper.getMainLooper()).postDelayed({

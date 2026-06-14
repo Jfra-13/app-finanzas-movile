@@ -133,7 +133,7 @@
         android:layout_width="match_parent"
         android:layout_height="182dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/cloud_view_log_sing"
+        android:src="@drawable/cloud_view_log_sign"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
