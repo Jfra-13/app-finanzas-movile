@@ -1,22 +1,46 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme — light palette wired to semantic tokens -->
     <style name="Base.Theme.Finanzas_independientes_app" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/blue_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/blue_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorError">@color/error_red</item>
+        <item name="colorOutline">@color/outline</item>
     </style>
 
     <style name="Theme.Finanzas_independientes_app" parent="Base.Theme.Finanzas_independientes_app" />
+
+    <!-- Shape tokens -->
+    <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerSize">8dp</item>
+    </style>
+    <style name="ShapeAppearance.App.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerSize">12dp</item>
+    </style>
+    <style name="ShapeAppearance.App.LargeComponent" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <!-- Legacy shape styles kept for backward compat -->
     <style name="ShapeAppearanceOverlay.App.CornerSize50Percent" parent="">
         <item name="cornerSize">50%</item>
     </style>
     <style name="CircleImage">
         <item name="cornerSize">50%</item>
     </style>
+
+    <!-- FAB style -->
     <style name="Widget.App.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
         <item name="borderWidth">8dp</item>
-        <item name="backgroundTint">#4579BC</item>
-        <item name="tint">#FFFFFF</item>
-        <item name="strokeColor">#F0F0F2</item>
+        <item name="backgroundTint">@color/blue_primary</item>
+        <item name="tint">@color/white</item>
+        <item name="strokeColor">@color/bg_gray</item>
     </style>
 
 </resources>

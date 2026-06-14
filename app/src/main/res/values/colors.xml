@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Brand literals — never invert these -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="bg_gray">#F0F0F2</color>
-
     <color name="blue_primary">#4579BC</color>
     <color name="blue_dark">#2B558C</color>
     <color name="blue_divider">#A0C3D9</color>
 
+    <!-- Legacy text/bg — kept for backward compat; overridden in values-night -->
+    <color name="bg_gray">#F0F0F2</color>
     <color name="text_gray">#888888</color>
     <color name="text_dark">#555555</color>
     <color name="text_black_soft">#222222</color>
+
+    <!-- Semantic tokens — LIGHT -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#F0F0F2</color>
+    <color name="on_surface">#222222</color>
+    <color name="on_surface_variant">#555555</color>
+    <color name="background">#F0F0F2</color>
+    <color name="outline">#C4C4C4</color>
+    <color name="success">#2E7D32</color>
+    <color name="warning">#E65100</color>
+    <color name="error_red">#B00020</color>
 </resources>

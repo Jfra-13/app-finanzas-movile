@@ -9,7 +9,7 @@
         android:layout_gravity="bottom"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="?attr/colorSurface"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
         app:strokeWidth="0dp">
@@ -21,11 +21,43 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="16dp">
 
-            <ImageView android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="33dp" android:layout_weight="1" android:src="@drawable/ic_home" />
-            <ImageView android:id="@+id/navCalendar" android:layout_width="0dp" android:layout_height="30dp" android:layout_weight="1" android:src="@drawable/ic_calendar" />
+            <ImageView
+                android:id="@+id/navHome"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_home"
+                android:contentDescription="@string/nav_home"
+                android:minWidth="48dp"
+                android:padding="8dp" />
+            <ImageView
+                android:id="@+id/navCalendar"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_calendar"
+                android:contentDescription="@string/nav_calendar"
+                android:minWidth="48dp"
+                android:padding="9dp" />
             <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1.2" />
-            <ImageView android:id="@+id/navStats" android:layout_width="0dp" android:layout_height="33dp" android:layout_weight="1" android:src="@drawable/ic_stats" />
-            <ImageView android:id="@+id/navUser" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:src="@drawable/ic_user" />
+            <ImageView
+                android:id="@+id/navStats"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_stats"
+                android:contentDescription="@string/nav_stats"
+                android:minWidth="48dp"
+                android:padding="8dp" />
+            <ImageView
+                android:id="@+id/navUser"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_user"
+                android:contentDescription="@string/nav_profile"
+                android:minWidth="48dp"
+                android:padding="4dp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -63,6 +95,8 @@
                     android:layout_height="32dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_add"
+                    android:contentDescription="@string/fab_add"
+                    android:importantForAccessibility="no"
                     app:tint="@color/white" />
             </com.google.android.material.card.MaterialCardView>
         </com.google.android.material.card.MaterialCardView>

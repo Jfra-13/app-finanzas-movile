@@ -7,10 +7,11 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivUserPhoto"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_user_placeholder"
+        android:contentDescription="@string/content_desc_user_photo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
@@ -43,9 +44,11 @@
 
     <ImageView
         android:id="@+id/ivMenu"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="11dp"
         android:src="@drawable/ic_menu"
+        android:contentDescription="@string/content_desc_menu"
         app:layout_constraintBottom_toBottomOf="@id/ivUserPhoto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/ivUserPhoto"

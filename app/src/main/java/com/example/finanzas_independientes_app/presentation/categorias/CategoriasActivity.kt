@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.finanzas_independientes_app.R
 import com.example.finanzas_independientes_app.databinding.ActivityCategoriasBinding
 import com.example.finanzas_independientes_app.databinding.DialogCreateCategoriaBinding
+import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -24,6 +25,7 @@ class CategoriasActivity : AppCompatActivity() {
     }
 
     private lateinit var adapter: CategoriaAdapter
+    private lateinit var stateHelper: ViewStateHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +34,7 @@ class CategoriasActivity : AppCompatActivity() {
 
         setupToolbar()
         setupRecyclerView()
+        stateHelper = ViewStateHelper(binding.viewState) { viewModel.cargar() }
         bindFlows()
         bindActions()
     }
@@ -51,21 +54,31 @@ class CategoriasActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.categorias.collect { list ->
                 adapter.submitList(list)
-                val isEmpty = list.isEmpty() && !viewModel.isLoading.value
-                binding.tvEmpty.visibility = if (isEmpty) View.VISIBLE else View.GONE
-                binding.rvCategorias.visibility = if (isEmpty) View.GONE else View.VISIBLE
+                if (!viewModel.isLoading.value) {
+                    if (list.isEmpty()) {
+                        stateHelper.showEmpty("No hay categorías aún")
+                        binding.rvCategorias.visibility = View.GONE
+                    } else {
+                        stateHelper.showContent()
+                        binding.rvCategorias.visibility = View.VISIBLE
+                    }
+                }
             }
         }
 
         lifecycleScope.launch {
             viewModel.isLoading.collect { loading ->
-                binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+                if (loading) {
+                    stateHelper.showLoading()
+                    binding.rvCategorias.visibility = View.GONE
+                }
             }
         }
 
         lifecycleScope.launch {
             viewModel.mensajeError.collect { error ->
                 if (error != null) {
+                    stateHelper.showError(error) { viewModel.limpiarError() }
                     Toast.makeText(this@CategoriasActivity, error, Toast.LENGTH_SHORT).show()
                     viewModel.limpiarError()
                 }

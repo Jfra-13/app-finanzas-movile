@@ -15,6 +15,7 @@ import com.example.finanzas_independientes_app.databinding.ActivityTransacciones
 import com.example.finanzas_independientes_app.databinding.DialogEditTransactionBinding
 import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.domain.model.Transaccion
+import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -27,6 +28,7 @@ class TransaccionesActivity : AppCompatActivity() {
     }
 
     private lateinit var adapter: TransaccionAdapter
+    private lateinit var stateHelper: ViewStateHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +37,7 @@ class TransaccionesActivity : AppCompatActivity() {
 
         setupToolbar()
         setupRecyclerView()
+        stateHelper = ViewStateHelper(binding.viewState) { viewModel.cargar(refresh = true) }
         bindFlows()
         bindActions()
     }
@@ -62,14 +65,26 @@ class TransaccionesActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             viewModel.isLoading.collect { loading ->
-                binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+                if (loading) {
+                    stateHelper.showLoading()
+                    binding.rvTransacciones.visibility = View.GONE
+                } else {
+                    // Content/empty will be handled by isEmpty flow below
+                }
             }
         }
 
         lifecycleScope.launch {
             viewModel.isEmpty.collect { empty ->
-                binding.tvEmpty.visibility = if (empty) View.VISIBLE else View.GONE
-                binding.rvTransacciones.visibility = if (empty) View.GONE else View.VISIBLE
+                if (!viewModel.isLoading.value) {
+                    if (empty) {
+                        stateHelper.showEmpty("No hay transacciones aún")
+                        binding.rvTransacciones.visibility = View.GONE
+                    } else {
+                        stateHelper.showContent()
+                        binding.rvTransacciones.visibility = View.VISIBLE
+                    }
+                }
             }
         }
 
@@ -82,6 +97,7 @@ class TransaccionesActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.mensajeError.collect { error ->
                 if (error != null) {
+                    stateHelper.showError(error) { viewModel.limpiarError() }
                     Toast.makeText(this@TransaccionesActivity, error, Toast.LENGTH_SHORT).show()
                     viewModel.limpiarError()
                 }

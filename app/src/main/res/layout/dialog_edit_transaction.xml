@@ -119,13 +119,9 @@
     <!-- Confirm button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGuardar"
+        style="@style/Widget.App.Button"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="Guardar cambios"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:backgroundTint="@color/blue_dark"
-        app:cornerRadius="12dp" />
+        android:text="Guardar cambios" />
 
 </LinearLayout>

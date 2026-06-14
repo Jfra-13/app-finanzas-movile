@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Fijar meta mensual"
-        android:textColor="#2B558C"
+        android:textColor="@color/blue_dark"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="4dp" />
@@ -20,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Define tu objetivo de ingresos para este mes."
-        android:textColor="#888888"
+        android:textColor="@color/text_gray"
         android:textSize="13sp"
         android:layout_marginBottom="16dp" />
 
@@ -32,8 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:hint="Monto objetivo (S/)"
-        app:boxStrokeColor="#2B558C"
-        app:hintTextColor="#2B558C"
+        app:boxStrokeColor="@color/blue_dark"
+        app:hintTextColor="@color/blue_dark"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
@@ -52,7 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Días laborables"
-        android:textColor="#2B558C"
+        android:textColor="@color/blue_dark"
         android:textSize="14sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
@@ -173,13 +173,9 @@
     <!-- Confirm -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConfirmarMeta"
+        style="@style/Widget.App.Button"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="Guardar meta"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:backgroundTint="#2B558C"
-        app:cornerRadius="12dp" />
+        android:text="Guardar meta" />
 
 </LinearLayout>
