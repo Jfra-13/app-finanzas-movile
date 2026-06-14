@@ -69,5 +69,7 @@ dependencies {
     // Hilt: dependency injection (KSP compiler for speed over kapt)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    // Charts: weekly bars, monthly trend line, category pie (Fase 5)
+    implementation(libs.mpandroidchart)
     testImplementation(libs.kotlinx.coroutines.test)
 }

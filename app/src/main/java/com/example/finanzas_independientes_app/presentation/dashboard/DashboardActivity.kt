@@ -16,6 +16,7 @@ import com.example.finanzas_independientes_app.databinding.ActivityDashboardBind
 import com.example.finanzas_independientes_app.databinding.DialogAddTransactionBinding
 import com.example.finanzas_independientes_app.databinding.DialogSetGoalBinding
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.presentation.analytics.AnalyticsActivity
 import com.example.finanzas_independientes_app.presentation.categorias.CategoriasActivity
 import com.example.finanzas_independientes_app.presentation.transacciones.TransaccionesActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -148,8 +149,13 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, TransaccionesActivity::class.java))
         }
 
-        // navStats → categories
+        // navStats → analytics
         binding.incBottomNav.navStats?.setOnClickListener {
+            startActivity(Intent(this, AnalyticsActivity::class.java))
+        }
+
+        // navUser → categories
+        binding.incBottomNav.navUser?.setOnClickListener {
             startActivity(Intent(this, CategoriasActivity::class.java))
         }
 
