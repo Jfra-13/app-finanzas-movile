@@ -2,19 +2,30 @@ package com.example.finanzas_independientes_app.data.remote
 
 import com.example.finanzas_independientes_app.core.network.ApiResponse
 import com.example.finanzas_independientes_app.data.remote.dto.AuthData
+import com.example.finanzas_independientes_app.data.remote.dto.CategoriaDTO
+import com.example.finanzas_independientes_app.data.remote.dto.CategoriaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.ForgotPasswordRequest
 import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
+import com.example.finanzas_independientes_app.data.remote.dto.MetaDTO
+import com.example.finanzas_independientes_app.data.remote.dto.MetaRequest
+import com.example.finanzas_independientes_app.data.remote.dto.PaginatedTransaccionDTO
+import com.example.finanzas_independientes_app.data.remote.dto.ProgresoMetasDTO
 import com.example.finanzas_independientes_app.data.remote.dto.RefreshRequest
 import com.example.finanzas_independientes_app.data.remote.dto.ResetPasswordRequest
+import com.example.finanzas_independientes_app.data.remote.dto.ResumenSemanalItemDTO
+import com.example.finanzas_independientes_app.data.remote.dto.SaludFinancieraItemDTO
+import com.example.finanzas_independientes_app.data.remote.dto.TendenciaMensualDTO
 import com.example.finanzas_independientes_app.data.remote.dto.TransaccionRegistroDTO
 import com.example.finanzas_independientes_app.data.remote.dto.UpdateNegocioRequest
 import com.example.finanzas_independientes_app.data.remote.dto.UsuarioRegistroDTO
 import com.example.finanzas_independientes_app.data.remote.dto.VerifyOtpRequest
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -24,7 +35,9 @@ import retrofit2.http.Query
  */
 interface FinanzasApi {
 
-    // --- Public (no token) ---
+    // -------------------------------------------------------------------------
+    // Public (no token)
+    // -------------------------------------------------------------------------
 
     @POST("api/v1/usuarios/registro")
     suspend fun registrar(@Body body: UsuarioRegistroDTO): Response<ApiResponse<Unit>>
@@ -44,17 +57,96 @@ interface FinanzasApi {
     @POST("api/v1/usuarios/reset-password")
     suspend fun resetPassword(@Body body: ResetPasswordRequest): Response<ApiResponse<Unit>>
 
-    // --- Protected (Bearer token, injected by AuthInterceptor) ---
+    // -------------------------------------------------------------------------
+    // Protected — user profile (Bearer token injected by AuthInterceptor)
+    // -------------------------------------------------------------------------
 
     @PUT("api/v1/usuarios/me/negocio")
     suspend fun actualizarNegocio(@Body body: UpdateNegocioRequest): Response<ApiResponse<Unit>>
 
+    // -------------------------------------------------------------------------
+    // Protected — transactions
+    // -------------------------------------------------------------------------
+
     @POST("api/v1/finanzas/transacciones")
     suspend fun registrarTransaccion(@Body body: TransaccionRegistroDTO): Response<ApiResponse<Unit>>
 
+    @GET("api/v1/finanzas/transacciones")
+    suspend fun listarTransacciones(
+        @Query("tipo") tipo: String? = null,
+        @Query("categoriaId") categoriaId: Long? = null,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20,
+        @Query("sort") sort: String? = null
+    ): Response<ApiResponse<PaginatedTransaccionDTO>>
+
+    @PUT("api/v1/finanzas/transacciones/{id}")
+    suspend fun actualizarTransaccion(
+        @Path("id") id: Long,
+        @Body body: TransaccionRegistroDTO
+    ): Response<ApiResponse<Unit>>
+
+    @DELETE("api/v1/finanzas/transacciones/{id}")
+    suspend fun eliminarTransaccion(
+        @Path("id") id: Long
+    ): Response<ApiResponse<Unit>>
+
+    // -------------------------------------------------------------------------
+    // Protected — daily income & quota
+    // -------------------------------------------------------------------------
+
+    @GET("api/v1/finanzas/hoy")
+    suspend fun obtenerHoy(): Response<ApiResponse<Double>>
+
+    /** No-param form uses the persisted meta. Optional params override for ad-hoc calculations. */
     @GET("api/v1/finanzas/cuota-diaria")
     suspend fun obtenerCuotaDiaria(
         @Query("meta") meta: Double? = null,
         @Query("dias") dias: Int? = null
     ): Response<ApiResponse<Double>>
+
+    // -------------------------------------------------------------------------
+    // Protected — analytics & summaries
+    // -------------------------------------------------------------------------
+
+    @GET("api/v1/finanzas/resumen-semanal")
+    suspend fun obtenerResumenSemanal(): Response<ApiResponse<List<ResumenSemanalItemDTO>>>
+
+    @GET("api/v1/finanzas/progreso-metas")
+    suspend fun obtenerProgresoMetas(): Response<ApiResponse<ProgresoMetasDTO>>
+
+    // -------------------------------------------------------------------------
+    // Protected — goals
+    // -------------------------------------------------------------------------
+
+    @POST("api/v1/finanzas/metas")
+    suspend fun fijarMeta(@Body body: MetaRequest): Response<ApiResponse<MetaDTO>>
+
+    @GET("api/v1/finanzas/metas/actual")
+    suspend fun obtenerMetaActual(): Response<ApiResponse<MetaDTO>>
+
+    // -------------------------------------------------------------------------
+    // Protected — categories
+    // -------------------------------------------------------------------------
+
+    @GET("api/v1/finanzas/categorias")
+    suspend fun listarCategorias(): Response<ApiResponse<List<CategoriaDTO>>>
+
+    @POST("api/v1/finanzas/categorias")
+    suspend fun crearCategoria(@Body body: CategoriaRequest): Response<ApiResponse<CategoriaDTO>>
+
+    // -------------------------------------------------------------------------
+    // Protected — analytics (read-only)
+    // -------------------------------------------------------------------------
+
+    @GET("api/v1/finanzas/resumen-categorias")
+    suspend fun obtenerResumenCategorias(): Response<ApiResponse<Map<String, Double>>>
+
+    @GET("api/v1/finanzas/tendencia-mensual")
+    suspend fun obtenerTendenciaMensual(
+        @Query("meses") meses: Int? = null
+    ): Response<ApiResponse<TendenciaMensualDTO>>
+
+    @GET("api/v1/finanzas/salud-financiera")
+    suspend fun obtenerSaludFinanciera(): Response<ApiResponse<List<SaludFinancieraItemDTO>>>
 }
