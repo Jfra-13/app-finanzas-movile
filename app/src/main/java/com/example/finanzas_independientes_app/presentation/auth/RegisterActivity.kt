@@ -6,44 +6,38 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.finanzas_independientes_app.databinding.ActivityRegisterBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
-    private lateinit var viewModel: RegistroViewModel
+    private val viewModel: RegistroViewModel by lazy { ViewModelProvider(this)[RegistroViewModel::class.java] }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[RegistroViewModel::class.java]
-
-        // 2. Botón de retroceso
         binding.ivBackArrow.setOnClickListener { finish() }
 
-        // 3. Capturamos los datos y los enviamos al ViewModel
         binding.btnRegistrar.setOnClickListener {
-            val nombre = binding.etRegisterName.text.toString()
-            val email = binding.etEmail.text.toString()
-            val pass = binding.etPassword.text.toString()
-            val repeatPass = binding.etRegisterRepeatPassword.text.toString()
-
-            // Le pasamos los 4 datos exactos que espera el cerebro
-            viewModel.registrarUsuario(nombre, email, pass, repeatPass)
+            viewModel.registrarUsuario(
+                nombre = binding.etRegisterName.text.toString(),
+                email = binding.etEmail.text.toString(),
+                pass = binding.etPassword.text.toString(),
+                repetirPass = binding.etRegisterRepeatPassword.text.toString()
+            )
         }
 
-        // 4. Escuchamos las respuestas (Magia reactiva)
         lifecycleScope.launch {
             viewModel.mensajeUI.collect { mensaje ->
                 if (mensaje != null) {
                     Toast.makeText(this@RegisterActivity, mensaje, Toast.LENGTH_SHORT).show()
-
                     if (mensaje.contains("éxito", ignoreCase = true)) {
-                        finish() // Vuelve al login tras registro exitoso
+                        finish()
                     }
-
                     viewModel.limpiarMensaje()
                 }
             }
