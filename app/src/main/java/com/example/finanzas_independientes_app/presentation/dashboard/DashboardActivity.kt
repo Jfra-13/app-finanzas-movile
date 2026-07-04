@@ -1,24 +1,21 @@
 package com.example.finanzas_independientes_app.presentation.dashboard
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.CheckBox
+import androidx.core.widget.NestedScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.finanzas_independientes_app.R
 import com.example.finanzas_independientes_app.databinding.ActivityDashboardBinding
-import com.example.finanzas_independientes_app.databinding.DialogAddTransactionBinding
 import com.example.finanzas_independientes_app.databinding.DialogSetGoalBinding
-import com.example.finanzas_independientes_app.domain.model.Categoria
-import com.example.finanzas_independientes_app.presentation.analytics.AnalyticsActivity
-import com.example.finanzas_independientes_app.presentation.categorias.CategoriasActivity
-import com.example.finanzas_independientes_app.presentation.transacciones.TransaccionesActivity
+import com.example.finanzas_independientes_app.databinding.LayoutBottomNavigationBinding
+import com.example.finanzas_independientes_app.presentation.common.AddTransactionDialog
+import com.example.finanzas_independientes_app.presentation.common.BottomNav
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -26,6 +23,9 @@ import kotlinx.coroutines.launch
 class DashboardActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDashboardBinding
+    private val bottomNavBinding: LayoutBottomNavigationBinding by lazy {
+        LayoutBottomNavigationBinding.bind(binding.root)
+    }
     private val viewModel: DashboardViewModel by lazy {
         ViewModelProvider(this)[DashboardViewModel::class.java]
     }
@@ -35,12 +35,59 @@ class DashboardActivity : AppCompatActivity() {
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        applyWindowInsets()
+        applyFrostedSurfaces()
+        bindScrollEffects()
+
         // Load all dashboard data + categories for the dialog spinner
         viewModel.cargarResumen()
         viewModel.cargarCategorias()
 
         bindFlows()
         bindActions()
+
+        applyBlockOrder(BlockOrderStore.load(this))
+    }
+
+    // --- Scroll-driven effect: frosted top bar ---
+    //
+    // On scroll the fixed top bar's background fades in (frosted look — the View
+    // system has no real backdrop blur). The floating pill stays fixed; it does
+    // not collapse (an earlier collapse-on-scroll stuttered on slow drags).
+    private fun bindScrollEffects() {
+        val scrimThreshold = dp(48f).toFloat()
+        binding.dashboardScroll.setOnScrollChangeListener(
+            NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+                binding.topBarContainer.background?.alpha =
+                    ((scrollY / scrimThreshold).coerceIn(0f, 1f) * FROSTED_ALPHA * 255).toInt()
+            }
+        )
+    }
+
+    // Frost the fixed top bar (the floating pill is frosted by BottomNav). The
+    // scrim starts transparent; the scroll listener fades it in.
+    private fun applyFrostedSurfaces() {
+        binding.topBarContainer.background?.mutate()?.alpha = 0
+    }
+
+    private fun dp(value: Float): Int = (value * resources.displayMetrics.density).toInt()
+
+    // Edge-to-edge is forced on modern targetSdk, so the status bar draws over
+    // the fixed top bar. Push the status-bar inset into the top bar itself, and
+    // start the scroll content below the bar's full height (inset included).
+    private fun applyWindowInsets() {
+        val topBar = binding.incTopBar.root
+        val baseTopBarPaddingTop = topBar.paddingTop
+        ViewCompat.setOnApplyWindowInsetsListener(binding.topBarContainer) { _, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            topBar.updatePadding(top = baseTopBarPaddingTop + bars.top)
+            insets
+        }
+        binding.topBarContainer.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+            if (binding.dashboardScroll.paddingTop != v.height) {
+                binding.dashboardScroll.updatePadding(top = v.height)
+            }
+        }
     }
 
     // --- Flow bindings ---
@@ -49,7 +96,7 @@ class DashboardActivity : AppCompatActivity() {
         // Daily quota → progreso diario semicircle label
         lifecycleScope.launch {
             viewModel.cuotaActual.collect { cuota ->
-                binding.incProgresoDiario.tvMontoActual?.text = cuota
+                binding.incProgresoDiario.gaugeProgresoDiario?.amountText = cuota
             }
         }
 
@@ -80,20 +127,21 @@ class DashboardActivity : AppCompatActivity() {
                     val pctSemanal = if (progreso.metaSemanal > 0) {
                         ((progreso.ingresoSemanal / progreso.metaSemanal) * 100).toInt().coerceIn(0, 100)
                     } else 0
-                    binding.incProgresoSemanal.pbProgresoSemanal?.progress = pctSemanal
+                    binding.incProgresoSemanal.pbProgresoSemanal?.setProgress(pctSemanal / 100f)
                     binding.incProgresoSemanal.tvSemanalPorcentaje?.text = "$pctSemanal%"
 
                     // Daily progress ring: ingresoDiario / metaDiaria (200 max for semicircle)
                     val pctDiario = if (progreso.metaDiaria > 0) {
                         ((progreso.ingresoDiario / progreso.metaDiaria) * 200).toInt().coerceIn(0, 200)
                     } else 0
-                    binding.incProgresoDiario.pbProgresoDiario?.progress = pctDiario
+                    binding.incProgresoDiario.gaugeProgresoDiario?.setProgress(pctDiario / 200f)
                     binding.incProgresoDiario.tvProgresoPorcentaje?.text =
                         "${(pctDiario / 2)}%"
 
-                    // Objective in progreso diario (below divider)
-                    binding.incProgresoDiario.tvMontoObjetivo?.text =
-                        String.format("%.0f", progreso.metaDiaria)
+                    // Objective in progreso diario (below divider). Symbol trails the
+                    // amount to match the headline; the gauge shrinks the "S/" token.
+                    binding.incProgresoDiario.gaugeProgresoDiario?.objetivoText =
+                        String.format("%.0f S/", progreso.metaDiaria)
                 }
             }
         }
@@ -139,80 +187,40 @@ class DashboardActivity : AppCompatActivity() {
     // --- Action bindings ---
 
     private fun bindActions() {
-        // FAB → add-transaction dialog
-        binding.incBottomNav.cardFabAdd?.setOnClickListener {
+        // Shared bottom nav: routing + active tab + FAB, all wired in one place.
+        BottomNav.setup(this, bottomNavBinding, BottomNav.Tab.HOME) {
             showAddTransactionDialog()
-        }
-
-        // navCalendar → transactions history
-        binding.incBottomNav.navCalendar?.setOnClickListener {
-            startActivity(Intent(this, TransaccionesActivity::class.java))
-        }
-
-        // navStats → analytics
-        binding.incBottomNav.navStats?.setOnClickListener {
-            startActivity(Intent(this, AnalyticsActivity::class.java))
-        }
-
-        // navUser → categories
-        binding.incBottomNav.navUser?.setOnClickListener {
-            startActivity(Intent(this, CategoriasActivity::class.java))
         }
 
         // Metas "Fijar meta" button
         binding.incMetas.btnFijarMeta?.setOnClickListener {
             showSetGoalDialog()
         }
+
+        // Top-bar overflow → reorder the dashboard blocks.
+        binding.incTopBar.ivMenu.setOnClickListener {
+            ReorderBlocksSheet(this) { order -> applyBlockOrder(order) }.show()
+        }
+    }
+
+    // Rearranges the reorderable blocks to the persisted order (Metas stays pinned).
+    private fun applyBlockOrder(order: List<String>) {
+        val blocks = mapOf(
+            BlockOrderStore.DIARIO to binding.incProgresoDiario.root,
+            BlockOrderStore.SEMANAL to binding.incProgresoSemanal.root,
+            BlockOrderStore.ACUMULADO to binding.incDineroAcumulado.root
+        )
+        val container = binding.reorderContainer
+        container.removeAllViews()
+        order.forEach { key -> blocks[key]?.let { container.addView(it) } }
     }
 
     // --- Dialogs ---
 
     private fun showAddTransactionDialog() {
-        val dialogBinding = DialogAddTransactionBinding.inflate(LayoutInflater.from(this))
-
-        // Default: INGRESO selected
-        dialogBinding.toggleTipo.check(R.id.btnTipoIngreso)
-
-        // Category spinner — populated from VM
-        val currentCategorias = mutableListOf<Categoria>()
-        val spinnerAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            mutableListOf<String>()
-        )
-        dialogBinding.actvCategoria.setAdapter(spinnerAdapter)
-
-        lifecycleScope.launch {
-            viewModel.categorias.collect { cats ->
-                currentCategorias.clear()
-                currentCategorias.addAll(cats)
-                spinnerAdapter.clear()
-                spinnerAdapter.add("Sin categoría")
-                spinnerAdapter.addAll(cats.map { it.nombre })
-                spinnerAdapter.notifyDataSetChanged()
-            }
-        }
-
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogBinding.root)
-            .create()
-
-        dialogBinding.btnConfirmarTransaccion.setOnClickListener {
-            val monto = dialogBinding.etMonto.text?.toString() ?: ""
-            val tipo = if (dialogBinding.toggleTipo.checkedButtonId == R.id.btnTipoIngreso) {
-                "INGRESO"
-            } else {
-                "EGRESO"
-            }
-            val descripcion = dialogBinding.etDescripcion.text?.toString()
-            val selectedName = dialogBinding.actvCategoria.text?.toString()
-            val categoriaId = currentCategorias.firstOrNull { it.nombre == selectedName }?.id
-
+        AddTransactionDialog.show(this, viewModel.categorias.value) { monto, tipo, descripcion, categoriaId ->
             viewModel.registrarTransaccion(monto, tipo, descripcion, categoriaId)
-            dialog.dismiss()
         }
-
-        dialog.show()
     }
 
     private fun showSetGoalDialog() {
@@ -240,5 +248,10 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private companion object {
+        // Opacity of frosted surfaces (top-bar scrim, nav pill, FAB cradle).
+        const val FROSTED_ALPHA = 0.9f
     }
 }

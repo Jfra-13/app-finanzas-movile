@@ -9,11 +9,23 @@
     <!-- Semantic tokens — DARK -->
     <color name="surface">#1C1F24</color>
     <color name="surface_variant">#252930</color>
+    <color name="surface_container">#26292F</color>
     <color name="on_surface">#ECECEC</color>
     <color name="on_surface_variant">#BDBDBD</color>
     <color name="background">#121417</color>
     <color name="outline">#444850</color>
+    <color name="outline_variant">#383C44</color>
+    <color name="primary_container">#2C425A</color>
+    <color name="on_primary_container">#DCE7F3</color>
     <color name="success">#66BB6A</color>
     <color name="warning">#FFA726</color>
     <color name="error_red">#CF6679</color>
+
+    <!-- Financial-health severity — accent + soft container (DARK) -->
+    <color name="health_danger">#E5707A</color>
+    <color name="health_danger_bg">#2A1A1C</color>
+    <color name="health_positive">#66BB6A</color>
+    <color name="health_positive_bg">#17251A</color>
+    <color name="health_info">#6FB0D8</color>
+    <color name="health_info_bg">#17222E</color>
 </resources>

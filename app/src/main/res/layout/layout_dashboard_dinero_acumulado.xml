@@ -7,21 +7,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardBackgroundColor="?attr/colorSurface"
-    app:cardCornerRadius="16dp"
+    app:shapeAppearance="@style/ShapeAppearance.App.MediumComponent"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="14dp">
 
         <TextView
             android:id="@+id/tvDineroAcumuladoTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
             android:text="Dinero acumulado"
-            android:textColor="@color/blue_dark"
+            android:textColor="?attr/colorPrimary"
             android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Objetivo: "
-                android:textColor="@color/text_gray"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="11sp" />
 
             <TextView
@@ -49,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="7000"
-                android:textColor="@color/blue_dark"
+                android:textColor="?attr/colorPrimary"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -57,7 +58,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=" Soles"
-                android:textColor="@color/text_gray"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="9sp" />
         </LinearLayout>
 
@@ -65,6 +66,7 @@
             android:id="@+id/llMontoAcumulado"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
             android:layout_marginTop="2dp"
             android:gravity="bottom"
             android:orientation="horizontal"
@@ -76,8 +78,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="1750"
-                android:textColor="@color/blue_dark"
-                android:textSize="45sp"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="40sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -86,7 +88,7 @@
                 android:alpha="0.6"
                 android:paddingBottom="4dp"
                 android:text=" Soles"
-                android:textColor="@color/black"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -114,17 +116,17 @@
 
                     <View
                         android:id="@+id/barEgresoLu"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="140dp"
                         android:background="@drawable/bg_bar_grey" />
 
                     <Space
-                        android:layout_width="4dp"
+                        android:layout_width="6dp"
                         android:layout_height="wrap_content" />
 
                     <View
                         android:id="@+id/barIngresoLu"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="200dp"
                         android:background="@drawable/bg_bar_blue" />
                 </LinearLayout>
@@ -135,7 +137,7 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="Lu"
-                    android:textColor="@color/text_gray"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="10sp" />
             </LinearLayout>
 
@@ -154,17 +156,17 @@
 
                     <View
                         android:id="@+id/barEgresoMar"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="90dp"
                         android:background="@drawable/bg_bar_grey" />
 
                     <Space
-                        android:layout_width="4dp"
+                        android:layout_width="6dp"
                         android:layout_height="wrap_content" />
 
                     <View
                         android:id="@+id/barIngresoMar"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="160dp"
                         android:background="@drawable/bg_bar_blue" />
                 </LinearLayout>
@@ -175,7 +177,7 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="Mar"
-                    android:textColor="@color/text_gray"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="10sp" />
             </LinearLayout>
 
@@ -194,17 +196,17 @@
 
                     <View
                         android:id="@+id/barEgresoMie"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="120dp"
                         android:background="@drawable/bg_bar_grey" />
 
                     <Space
-                        android:layout_width="4dp"
+                        android:layout_width="6dp"
                         android:layout_height="wrap_content" />
 
                     <View
                         android:id="@+id/barIngresoMie"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="190dp"
                         android:background="@drawable/bg_bar_blue" />
                 </LinearLayout>
@@ -215,7 +217,7 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="Mie"
-                    android:textColor="@color/text_gray"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="10sp" />
             </LinearLayout>
 
@@ -234,17 +236,17 @@
 
                     <View
                         android:id="@+id/barEgresoJue"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="170dp"
                         android:background="@drawable/bg_bar_grey" />
 
                     <Space
-                        android:layout_width="4dp"
+                        android:layout_width="6dp"
                         android:layout_height="wrap_content" />
 
                     <View
                         android:id="@+id/barIngresoJue"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="130dp"
                         android:background="@drawable/bg_bar_blue" />
                 </LinearLayout>
@@ -255,7 +257,7 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="Jue"
-                    android:textColor="@color/text_gray"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="10sp" />
             </LinearLayout>
 
@@ -274,17 +276,17 @@
 
                     <View
                         android:id="@+id/barEgresoVie"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="100dp"
                         android:background="@drawable/bg_bar_grey" />
 
                     <Space
-                        android:layout_width="4dp"
+                        android:layout_width="6dp"
                         android:layout_height="wrap_content" />
 
                     <View
                         android:id="@+id/barIngresoVie"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="150dp"
                         android:background="@drawable/bg_bar_blue" />
                 </LinearLayout>
@@ -295,7 +297,7 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="Vie"
-                    android:textColor="@color/text_gray"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="10sp" />
             </LinearLayout>
 
@@ -314,17 +316,17 @@
 
                     <View
                         android:id="@+id/barEgresoSab"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="80dp"
                         android:background="@drawable/bg_bar_grey" />
 
                     <Space
-                        android:layout_width="4dp"
+                        android:layout_width="6dp"
                         android:layout_height="wrap_content" />
 
                     <View
                         android:id="@+id/barIngresoSab"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="110dp"
                         android:background="@drawable/bg_bar_blue" />
                 </LinearLayout>
@@ -335,7 +337,7 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="Sab"
-                    android:textColor="@color/text_gray"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="10sp" />
             </LinearLayout>
 
@@ -354,17 +356,17 @@
 
                     <View
                         android:id="@+id/barEgresoDom"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="130dp"
                         android:background="@drawable/bg_bar_grey" />
 
                     <Space
-                        android:layout_width="4dp"
+                        android:layout_width="6dp"
                         android:layout_height="wrap_content" />
 
                     <View
                         android:id="@+id/barIngresoDom"
-                        android:layout_width="8dp"
+                        android:layout_width="12dp"
                         android:layout_height="100dp"
                         android:background="@drawable/bg_bar_blue" />
                 </LinearLayout>
@@ -375,7 +377,7 @@
                     android:layout_marginTop="6dp"
                     android:gravity="center"
                     android:text="Dom"
-                    android:textColor="@color/text_gray"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="10sp" />
             </LinearLayout>
         </LinearLayout>

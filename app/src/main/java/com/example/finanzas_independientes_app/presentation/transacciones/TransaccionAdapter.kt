@@ -2,6 +2,7 @@ package com.example.finanzas_independientes_app.presentation.transacciones
 
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -9,9 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.finanzas_independientes_app.databinding.ItemTransaccionBinding
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 
+/**
+ * Shared transaction list adapter. Pass [onEdit]/[onDelete] for the editable list;
+ * omit them (read-only, e.g. the analytics drill-down sheet) to hide the action buttons.
+ */
 class TransaccionAdapter(
-    private val onEdit: (Transaccion) -> Unit,
-    private val onDelete: (Transaccion) -> Unit
+    private val onEdit: ((Transaccion) -> Unit)? = null,
+    private val onDelete: ((Transaccion) -> Unit)? = null
 ) : ListAdapter<Transaccion, TransaccionAdapter.ViewHolder>(DIFF) {
 
     companion object {
@@ -51,8 +56,10 @@ class TransaccionAdapter(
             val catLabel = item.categoriaNombre?.takeIf { it.isNotBlank() }
             binding.tvCategoria.text = if (catLabel != null) "Categoría: $catLabel" else ""
 
-            binding.btnEdit.setOnClickListener { onEdit(item) }
-            binding.btnDelete.setOnClickListener { onDelete(item) }
+            binding.btnEdit.visibility = if (onEdit != null) View.VISIBLE else View.GONE
+            binding.btnDelete.visibility = if (onDelete != null) View.VISIBLE else View.GONE
+            binding.btnEdit.setOnClickListener { onEdit?.invoke(item) }
+            binding.btnDelete.setOnClickListener { onDelete?.invoke(item) }
         }
     }
 

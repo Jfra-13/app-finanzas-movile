@@ -71,7 +71,9 @@ class DashboardViewModel @Inject constructor(
                     _cuotaActual.value = if (cuota <= 0) {
                         String.format("¡Meta superada por S/ %.2f! 🎉", kotlin.math.abs(cuota))
                     } else {
-                        String.format("S/ %.2f", cuota)
+                        // Gauge headline — whole soles keep it clean and legible.
+                        // Symbol trails the amount; the gauge shrinks the "S/" token.
+                        String.format("%.0f S/", cuota)
                     }
                 }
                 is ApiResult.Error -> {

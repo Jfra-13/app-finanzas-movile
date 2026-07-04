@@ -5,67 +5,83 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_gray">
+    android:background="?attr/colorSurfaceVariant">
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/dashboardScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="100dp">
+        android:paddingBottom="120dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/dashboardContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp">
-
-            <include
-                android:id="@+id/incTopBar"
-                layout="@layout/layout_dashboard_top_bar"
-                android:layout_marginTop="5dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent" />
+            android:padding="16dp">
 
             <include
                 android:id="@+id/incMetas"
                 layout="@layout/layout_dashboard_metas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:layout_constraintTop_toBottomOf="@id/incTopBar" />
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <include
-                android:id="@+id/incProgresoDiario"
-                layout="@layout/layout_dashboard_progreso_diario"
-                android:layout_width="match_parent"
+            <!-- Reorderable blocks live in this container so their order can be
+                 rearranged at runtime (see ReorderBlocksSheet). Metas stays pinned. -->
+            <LinearLayout
+                android:id="@+id/reorderContainer"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                app:layout_constraintTop_toBottomOf="@id/incMetas" />
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@id/incMetas"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
-            <include
-                android:id="@+id/incProgresoSemanal"
-                layout="@layout/layout_dashboard_progreso_semanal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                app:layout_constraintTop_toBottomOf="@id/incProgresoDiario" />
+                <include
+                    android:id="@+id/incProgresoDiario"
+                    layout="@layout/layout_dashboard_progreso_diario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp" />
 
-            <include
-                android:id="@+id/incDineroAcumulado"
-                layout="@layout/layout_dashboard_dinero_acumulado"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/incProgresoSemanal"
-                app:layout_constraintVertical_bias="0.0" />
+                <include
+                    android:id="@+id/incProgresoSemanal"
+                    layout="@layout/layout_dashboard_progreso_semanal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp" />
+
+                <include
+                    android:id="@+id/incDineroAcumulado"
+                    layout="@layout/layout_dashboard_dinero_acumulado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp" />
+
+            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <include
-        android:id="@+id/incBottomNav"
-        layout="@layout/layout_bottom_navigation" />
+    <!-- Fixed top bar. The frosted background is the container's own drawable,
+         alpha-animated on scroll (drawable alpha only — the bar's icons/text
+         stay fully opaque). No real backdrop blur exists in the View system. -->
+    <FrameLayout
+        android:id="@+id/topBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="?attr/colorSurface">
+
+        <include
+            android:id="@+id/incTopBar"
+            layout="@layout/layout_dashboard_top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
+    <include layout="@layout/layout_bottom_navigation" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -6,51 +6,14 @@
     android:layout_height="match_parent"
     android:background="@color/bg_gray">
 
-    <!-- Top bar -->
-    <LinearLayout
-        android:id="@+id/topBar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
-        android:background="@color/bg_gray">
-
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/back_arrow"
-            android:contentDescription="Volver"
-            android:padding="12dp" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="Analíticas"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_black_soft" />
-
-    </LinearLayout>
-
-    <!-- Universal state overlay (loading / empty / error) -->
-    <include
-        android:id="@+id/viewState"
-        layout="@layout/view_state"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_marginTop="56dp" />
-
-    <!-- Scrollable content -->
+    <!-- Scrollable content. Drawn FIRST so the fixed top bar (declared last) can
+         float over it — content scrolls beneath the frosted bar. Top padding is
+         set at runtime to the bar's height (status-bar inset included). -->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/contentScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="56dp"
-        android:paddingBottom="24dp"
+        android:paddingBottom="120dp"
         android:clipToPadding="false">
 
         <LinearLayout
@@ -66,7 +29,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="?attr/colorSurface">
@@ -75,7 +38,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -92,7 +55,7 @@
                         android:text="Ingresos vs egresos por día"
                         android:textSize="12sp"
                         android:textColor="@color/text_gray"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="16dp" />
 
                     <com.github.mikephil.charting.charts.BarChart
                         android:id="@+id/barChartWeekly"
@@ -119,7 +82,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="?attr/colorSurface">
@@ -128,7 +91,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -146,6 +109,43 @@
                         android:textSize="12sp"
                         android:textColor="@color/text_gray"
                         android:layout_marginBottom="12dp" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleMeses"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:singleSelection="true"
+                        app:selectionRequired="true">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMeses3"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:text="3M"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMeses6"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:text="6M"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMeses12"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:text="12M"
+                            android:textSize="12sp" />
+
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
 
                     <com.github.mikephil.charting.charts.LineChart
                         android:id="@+id/lineChartMonthly"
@@ -172,7 +172,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="?attr/colorSurface">
@@ -181,7 +181,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -198,7 +198,7 @@
                         android:text="Distribución del mes actual"
                         android:textSize="12sp"
                         android:textColor="@color/text_gray"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="16dp" />
 
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pieChartCategories"
@@ -225,7 +225,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp"
                 app:cardBackgroundColor="?attr/colorSurface">
@@ -234,7 +234,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -252,21 +252,109 @@
                         android:nestedScrollingEnabled="false"
                         android:visibility="gone" />
 
-                    <TextView
-                        android:id="@+id/tvHealthEmpty"
+                    <!-- Celebratory "all good" state — the Peak-End reward moment.
+                         The emoji pulses (ObjectAnimator wired in the Activity). -->
+                    <LinearLayout
+                        android:id="@+id/healthCelebration"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp"
-                        android:text="Todo en orden ✓"
-                        android:textColor="@color/text_gray"
-                        android:textSize="14sp"
-                        android:visibility="visible" />
+                        android:paddingVertical="20dp"
+                        android:visibility="visible">
+
+                        <FrameLayout
+                            android:layout_width="96dp"
+                            android:layout_height="96dp"
+                            android:layout_marginBottom="12dp">
+
+                            <!-- Soft glow behind the badge -->
+                            <View
+                                android:id="@+id/healthGlow"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/bg_health_glow" />
+
+                            <TextView
+                                android:id="@+id/tvHealthEmoji"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="🎉"
+                                android:textSize="44sp" />
+
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvHealthCelebrationTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="¡Todo va sobre ruedas!"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/success"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="Tus finanzas están en orden. Seguí así 💪"
+                            android:textSize="13sp"
+                            android:textColor="@color/text_gray" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Universal state overlay (loading / empty / error). Padded below the bar at runtime. -->
+    <include
+        android:id="@+id/viewState"
+        layout="@layout/view_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <!-- Fixed top bar. Declared LAST so it floats over the scrolling content; its
+         background is alpha-animated on scroll (frosted scrim — the View system has
+         no real backdrop blur). Status-bar inset is pushed into paddingTop at runtime. -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:background="@color/bg_gray">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/back_arrow"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Volver"
+            android:padding="10dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Analíticas"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_black_soft" />
+
+    </LinearLayout>
+
+    <include layout="@layout/layout_bottom_navigation" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

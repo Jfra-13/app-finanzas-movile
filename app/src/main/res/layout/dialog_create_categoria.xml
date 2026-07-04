@@ -55,7 +55,11 @@
             android:layout_weight="1"
             android:text="Ingreso"
             android:textSize="14sp"
-            app:strokeColor="@color/blue_dark"
+            android:textColor="@color/health_positive"
+            app:icon="@drawable/ic_add"
+            app:iconTint="@color/health_positive"
+            app:iconSize="16dp"
+            app:strokeColor="@color/health_positive"
             app:cornerRadius="8dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -66,7 +70,8 @@
             android:layout_weight="1"
             android:text="Egreso"
             android:textSize="14sp"
-            app:strokeColor="@color/blue_dark"
+            android:textColor="@color/health_danger"
+            app:strokeColor="@color/health_danger"
             app:cornerRadius="8dp" />
 
     </com.google.android.material.button.MaterialButtonToggleGroup>

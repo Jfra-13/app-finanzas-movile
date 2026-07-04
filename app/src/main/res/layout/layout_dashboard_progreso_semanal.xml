@@ -6,8 +6,8 @@
     android:id="@+id/cardProgresoSemanal"
     android:layout_width="match_parent"
     android:layout_height="160dp"
-    app:cardBackgroundColor="@color/blue_primary"
-    app:cardCornerRadius="16dp"
+    app:cardBackgroundColor="?attr/colorPrimary"
+    app:shapeAppearance="@style/ShapeAppearance.App.MediumComponent"
     app:cardElevation="0dp"
     app:strokeWidth="0dp">
 
@@ -35,47 +35,34 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Excelente"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorOnPrimary"
                 android:textSize="21sp" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/tvSemanalTitle"
-            android:layout_width="229dp"
-            android:layout_height="66dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="12dp"
             android:text="Tu progreso\nsemanal"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
             android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/flSemanalChart"
-            app:layout_constraintHorizontal_bias="0.088"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/llSemanalStatus" />
 
         <FrameLayout
             android:id="@+id/flSemanalChart"
-            android:layout_width="110dp" android:layout_height="110dp" android:layout_marginEnd="16dp" app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="128dp" android:layout_height="128dp" android:layout_marginEnd="16dp" app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ProgressBar
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:max="100"
-                android:progress="100"
-                android:progressDrawable="@drawable/circular_progress_full_bg" />
-
-            <ProgressBar
+            <com.example.finanzas_independientes_app.presentation.common.CircularProgressView
                 android:id="@+id/pbProgresoSemanal"
-                style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:max="100"
-                android:progress="100"
-                android:progressDrawable="@drawable/circular_progress_full_bar" />
+                android:layout_height="match_parent" />
 
             <TextView
                 android:id="@+id/tvSemanalPorcentaje"
@@ -83,8 +70,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="100%"
-                android:textColor="@color/white"
-                android:textSize="24sp" android:textStyle="bold" />
+                android:textColor="?attr/colorOnPrimary"
+                android:textSize="28sp" android:textStyle="bold" />
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

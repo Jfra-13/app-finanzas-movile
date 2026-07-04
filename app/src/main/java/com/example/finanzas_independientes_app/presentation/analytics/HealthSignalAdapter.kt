@@ -1,10 +1,14 @@
 package com.example.finanzas_independientes_app.presentation.analytics
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.finanzas_independientes_app.R
 import com.example.finanzas_independientes_app.databinding.ItemHealthSignalBinding
 import com.example.finanzas_independientes_app.domain.model.SaludFinancieraItem
 
@@ -26,34 +30,28 @@ class HealthSignalAdapter :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: SaludFinancieraItem) {
+            val ctx = binding.root.context
             binding.tvHealthMensaje.text = item.mensaje
+            binding.tvHealthMensaje.setTextColor(ContextCompat.getColor(ctx, R.color.on_surface))
 
-            // Branch by code for icon + card background color
-            when (item.code) {
-                "GASTO_DIARIO_ALTO", "META_EN_RIESGO" -> {
-                    binding.tvHealthIcon.text = "⚠️"
-                    binding.root.setCardBackgroundColor(
-                        binding.root.context.getColor(android.R.color.holo_red_light)
-                            .let { 0x1AFF4444.toInt() } // light red tint
-                    )
-                    binding.root.strokeColor = 0xFFFF4444.toInt()
-                    binding.tvHealthMensaje.setTextColor(
-                        binding.root.context.getColor(android.R.color.holo_red_dark)
-                    )
-                }
-                "META_CERCA" -> {
-                    binding.tvHealthIcon.text = "🎉"
-                    binding.root.setCardBackgroundColor(0x1A4CAF50.toInt()) // light green tint
-                    binding.root.strokeColor = 0xFF4CAF50.toInt()
-                    binding.tvHealthMensaje.setTextColor(0xFF2E7D32.toInt())
-                }
-                else -> {
-                    binding.tvHealthIcon.text = "ℹ️"
-                    binding.root.setCardBackgroundColor(0xFFFFFFFF.toInt())
-                    binding.root.strokeColor = 0xFFA0C3D9.toInt()
-                    binding.tvHealthMensaje.setTextColor(0xFF555555.toInt())
-                }
+            // Severity by code (README: branch by code, never message). Colours are
+            // theme-aware resources — no hardcoded hex, so dark mode holds up.
+            val (accentRes, bgRes, emoji) = when (item.code) {
+                "GASTO_DIARIO_ALTO", "META_EN_RIESGO" ->
+                    Triple(R.color.health_danger, R.color.health_danger_bg, "⚠️")
+                "META_CERCA" ->
+                    Triple(R.color.health_positive, R.color.health_positive_bg, "🎉")
+                else ->
+                    Triple(R.color.health_info, R.color.health_info_bg, "ℹ️")
             }
+
+            val accent = ContextCompat.getColor(ctx, accentRes)
+            binding.tvHealthIcon.text = emoji
+            binding.root.setCardBackgroundColor(ContextCompat.getColor(ctx, bgRes))
+            binding.healthAccent.backgroundTintList = ColorStateList.valueOf(accent)
+            // Soft disc behind the emoji — accent at low alpha so the glyph stays legible.
+            binding.healthIconCircle.backgroundTintList =
+                ColorStateList.valueOf(ColorUtils.setAlphaComponent(accent, 0x33))
         }
     }
 

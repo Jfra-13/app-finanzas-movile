@@ -28,13 +28,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Tipo badge -->
+        <!-- Tipo badge — rounded pill, tinted by type in the adapter -->
         <TextView
             android:id="@+id/tvTipo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="4dp"
+            android:background="@drawable/bg_badge_pill"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="5dp"
             android:textSize="12sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
