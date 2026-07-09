@@ -6,8 +6,8 @@ import com.example.finanzas_independientes_app.core.network.ApiCode
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.core.network.AppError
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.domain.model.Meta
 import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
-import com.example.finanzas_independientes_app.domain.model.SaludFinancieraItem
 import com.example.finanzas_independientes_app.domain.model.TendenciaMensual
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
@@ -32,9 +32,6 @@ class AnalyticsViewModel @Inject constructor(
     private val _resumenCategorias = MutableStateFlow<Map<String, Double>>(emptyMap())
     val resumenCategorias: StateFlow<Map<String, Double>> = _resumenCategorias
 
-    private val _saludFinanciera = MutableStateFlow<List<SaludFinancieraItem>>(emptyList())
-    val saludFinanciera: StateFlow<List<SaludFinancieraItem>> = _saludFinanciera
-
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -52,6 +49,18 @@ class AnalyticsViewModel @Inject constructor(
     private val _mesesTendencia = MutableStateFlow(DEFAULT_MESES)
     val mesesTendencia: StateFlow<Int> = _mesesTendencia
 
+    /**
+     * Active lens: which series the whole screen shows. Pure UI state — the data
+     * already carries ingresos and egresos separately, so switching modes only
+     * re-renders, it never re-fetches.
+     */
+    private val _modo = MutableStateFlow(ModoAnalytics.JAM)
+    val modo: StateFlow<ModoAnalytics> = _modo
+
+    /** Active monthly goal, drawn as a target line on the income view. Null = none set. */
+    private val _metaActual = MutableStateFlow<Meta?>(null)
+    val metaActual: StateFlow<Meta?> = _metaActual
+
     /** Category name -> id, resolved from the categories list to enable pie drill-down. */
     private var categoriasMap: Map<String, Long> = emptyMap()
 
@@ -67,8 +76,8 @@ class AnalyticsViewModel @Inject constructor(
             val deferredSemanal = async { finanzasRepository.obtenerResumenSemanal() }
             val deferredTendencia = async { finanzasRepository.obtenerTendenciaMensual(_mesesTendencia.value) }
             val deferredCategorias = async { finanzasRepository.obtenerResumenCategorias() }
-            val deferredSalud = async { finanzasRepository.obtenerSaludFinanciera() }
             val deferredCats = async { finanzasRepository.listarCategorias() }
+            val deferredMeta = async { finanzasRepository.obtenerMetaActual() }
 
             when (val r = deferredSemanal.await()) {
                 is ApiResult.Success -> _resumenSemanal.value = r.data
@@ -85,11 +94,6 @@ class AnalyticsViewModel @Inject constructor(
                 is ApiResult.Error -> _errorMessage.value = handleError(r.error)
             }
 
-            when (val r = deferredSalud.await()) {
-                is ApiResult.Success -> _saludFinanciera.value = r.data
-                is ApiResult.Error -> _errorMessage.value = handleError(r.error)
-            }
-
             // Categories power the pie drill-down and the quick-add spinner; a failure
             // here just disables those, not the screen.
             when (val r = deferredCats.await()) {
@@ -100,8 +104,20 @@ class AnalyticsViewModel @Inject constructor(
                 is ApiResult.Error -> categoriasMap = emptyMap()
             }
 
+            // Optional target line. "No goal set" is a normal state, not an error,
+            // so it never reaches the error channel — it just leaves the line off.
+            _metaActual.value = when (val r = deferredMeta.await()) {
+                is ApiResult.Success -> r.data
+                is ApiResult.Error -> null
+            }
+
             _isLoading.value = false
         }
+    }
+
+    /** Switches the active lens. UI-only: re-renders from data already in memory. */
+    fun cambiarModo(modo: ModoAnalytics) {
+        _modo.value = modo
     }
 
     /** Reloads only the monthly-trend chart with a new months window. */
@@ -199,6 +215,13 @@ class AnalyticsViewModel @Inject constructor(
         const val DETALLE_PAGE_SIZE = 50
     }
 }
+
+/**
+ * The active lens for the analytics screen.
+ * INGRESOS / EGRESOS show a single series; JAM ("juntos") overlays both so the
+ * gap between them reads as the margin.
+ */
+enum class ModoAnalytics { INGRESOS, EGRESOS, JAM }
 
 /** UI state for the category drill-down bottom sheet. */
 sealed interface DetalleCategoriaState {

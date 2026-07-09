@@ -149,4 +149,24 @@ interface FinanzasApi {
 
     @GET("api/v1/finanzas/salud-financiera")
     suspend fun obtenerSaludFinanciera(): Response<ApiResponse<List<SaludFinancieraItemDTO>>>
+
+    // -------------------------------------------------------------------------
+    // Fase 2 — EN DESARROLLO (bloqueado por backend)
+    //
+    // The analytics screen exposes weekly granularity ("Semana") and a 1M window,
+    // plus a weekday-earnings breakdown over the selected period. None of these
+    // can be served today: `tendencia-mensual` only buckets by month, and
+    // `resumen-semanal` only covers the current week. The UI ships these controls
+    // disabled until the backend adds:
+    //
+    //   GET api/v1/finanzas/tendencia?granularidad=SEMANA|MES&ventana=N
+    //       -> same shape as TendenciaMensualDTO but bucketed weekly, enabling
+    //          the "Semana" toggle and the 1M window.
+    //   GET api/v1/finanzas/ingresos-por-dia-semana?ventana=N
+    //       -> income aggregated by weekday over the selected window (not just the
+    //          current week), for the "¿Qué día ganás más?" chart.
+    //
+    // When these land: add the endpoints here, DTOs + mappers, repository methods,
+    // then enable btnGranSemana / btnPeriodo1M and wire the window param.
+    // -------------------------------------------------------------------------
 }

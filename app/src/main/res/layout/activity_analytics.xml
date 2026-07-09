@@ -23,9 +23,10 @@
             android:paddingHorizontal="12dp"
             android:paddingTop="8dp">
 
-            <!-- Weekly bar chart card -->
+            <!-- Balance chart card. In JAM the two series (income vs expense) overlay
+                 so the gap between them reads as the running margin. -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardWeekly"
+                android:id="@+id/cardBalance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -43,32 +44,33 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Resumen semanal"
+                        android:text="Balance neto"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_black_soft"
                         android:layout_marginBottom="4dp" />
 
                     <TextView
+                        android:id="@+id/tvBalanceSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ingresos vs egresos por día"
+                        android:text="Saldo acumulado en el tiempo"
                         android:textSize="12sp"
                         android:textColor="@color/text_gray"
                         android:layout_marginBottom="16dp" />
 
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/barChartWeekly"
+                    <com.patrykandpatrick.vico.views.cartesian.CartesianChartView
+                        android:id="@+id/chartBalance"
                         android:layout_width="match_parent"
                         android:layout_height="220dp"
                         android:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tvWeeklyEmpty"
+                        android:id="@+id/tvBalanceEmpty"
                         android:layout_width="match_parent"
                         android:layout_height="80dp"
                         android:gravity="center"
-                        android:text="Sin movimientos esta semana"
+                        android:text="Sin datos de balance"
                         android:textColor="@color/text_gray"
                         android:textSize="14sp"
                         android:visibility="gone" />
@@ -76,9 +78,10 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Monthly trend line chart card -->
+            <!-- Monthly net card. Columns above the zero line = surplus months (green),
+                 below = deficit months (red). -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardMonthly"
+                android:id="@+id/cardNeto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -96,69 +99,33 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tendencia mensual"
+                        android:text="Neto por mes"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_black_soft"
                         android:layout_marginBottom="4dp" />
 
                     <TextView
+                        android:id="@+id/tvNetoSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Evolución de ingresos y egresos"
+                        android:text="Ingresos menos egresos, mes a mes"
                         android:textSize="12sp"
                         android:textColor="@color/text_gray"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="16dp" />
 
-                    <com.google.android.material.button.MaterialButtonToggleGroup
-                        android:id="@+id/toggleMeses"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:singleSelection="true"
-                        app:selectionRequired="true">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnMeses3"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="0dp"
-                            android:text="3M"
-                            android:textSize="12sp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnMeses6"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="0dp"
-                            android:text="6M"
-                            android:textSize="12sp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnMeses12"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:minWidth="0dp"
-                            android:text="12M"
-                            android:textSize="12sp" />
-
-                    </com.google.android.material.button.MaterialButtonToggleGroup>
-
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/lineChartMonthly"
+                    <com.patrykandpatrick.vico.views.cartesian.CartesianChartView
+                        android:id="@+id/chartNeto"
                         android:layout_width="match_parent"
                         android:layout_height="220dp"
                         android:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tvMonthlyEmpty"
+                        android:id="@+id/tvNetoEmpty"
                         android:layout_width="match_parent"
                         android:layout_height="80dp"
                         android:gravity="center"
-                        android:text="Sin datos de tendencia mensual"
+                        android:text="Sin datos de neto mensual"
                         android:textColor="@color/text_gray"
                         android:textSize="14sp"
                         android:visibility="gone" />
@@ -166,9 +133,12 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Category pie chart card -->
+            <!-- Mode-aware third card:
+                 INGRESOS / JAM -> weekday-earnings column chart ("when do I earn most")
+                 EGRESOS        -> category ranking ("where the money goes")
+                 The title/subtitle and the visible child swap in the Activity. -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardCategories"
+                android:id="@+id/cardThird"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -184,126 +154,48 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/tvThirdTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Egresos por categoría"
+                        android:text="¿Qué día ganás más?"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_black_soft"
                         android:layout_marginBottom="4dp" />
 
                     <TextView
+                        android:id="@+id/tvThirdSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Distribución del mes actual"
+                        android:text="Ingreso por día de la semana"
                         android:textSize="12sp"
                         android:textColor="@color/text_gray"
                         android:layout_marginBottom="16dp" />
 
-                    <com.github.mikephil.charting.charts.PieChart
-                        android:id="@+id/pieChartCategories"
+                    <!-- Weekday-earnings chart (INGRESOS / JAM). -->
+                    <com.patrykandpatrick.vico.views.cartesian.CartesianChartView
+                        android:id="@+id/chartWeekday"
                         android:layout_width="match_parent"
-                        android:layout_height="240dp"
+                        android:layout_height="200dp"
                         android:visibility="visible" />
 
-                    <TextView
-                        android:id="@+id/tvCategoriesEmpty"
-                        android:layout_width="match_parent"
-                        android:layout_height="80dp"
-                        android:gravity="center"
-                        android:text="Sin egresos registrados este mes"
-                        android:textColor="@color/text_gray"
-                        android:textSize="14sp"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Financial health panel -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardHealth"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp"
-                app:cardBackgroundColor="?attr/colorSurface">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Salud financiera"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_black_soft"
-                        android:layout_marginBottom="12dp" />
-
+                    <!-- Category ranking (EGRESOS). -->
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvHealthSignals"
+                        android:id="@+id/rvCategoryRanking"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="false"
                         android:visibility="gone" />
 
-                    <!-- Celebratory "all good" state — the Peak-End reward moment.
-                         The emoji pulses (ObjectAnimator wired in the Activity). -->
-                    <LinearLayout
-                        android:id="@+id/healthCelebration"
+                    <TextView
+                        android:id="@+id/tvThirdEmpty"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
+                        android:layout_height="80dp"
                         android:gravity="center"
-                        android:paddingVertical="20dp"
-                        android:visibility="visible">
-
-                        <FrameLayout
-                            android:layout_width="96dp"
-                            android:layout_height="96dp"
-                            android:layout_marginBottom="12dp">
-
-                            <!-- Soft glow behind the badge -->
-                            <View
-                                android:id="@+id/healthGlow"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@drawable/bg_health_glow" />
-
-                            <TextView
-                                android:id="@+id/tvHealthEmoji"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:text="🎉"
-                                android:textSize="44sp" />
-
-                        </FrameLayout>
-
-                        <TextView
-                            android:id="@+id/tvHealthCelebrationTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="¡Todo va sobre ruedas!"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/success"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="Tus finanzas están en orden. Seguí así 💪"
-                            android:textSize="13sp"
-                            android:textColor="@color/text_gray" />
-
-                    </LinearLayout>
+                        android:text="Sin datos para este período"
+                        android:textColor="@color/text_gray"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -320,38 +212,179 @@
         android:layout_gravity="center" />
 
     <!-- Fixed top bar. Declared LAST so it floats over the scrolling content; its
-         background is alpha-animated on scroll (frosted scrim — the View system has
-         no real backdrop blur). Status-bar inset is pushed into paddingTop at runtime. -->
+         background is alpha-animated on scroll (frosted scrim). Status-bar inset is
+         pushed into paddingTop at runtime. Two rows: lens selector, then the
+         period / granularity controls. -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:minHeight="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="12dp"
         android:paddingVertical="8dp"
         android:background="@color/bg_gray">
 
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:src="@drawable/back_arrow"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Volver"
-            android:padding="10dp" />
-
-        <TextView
-            android:layout_width="0dp"
+        <!-- Lens: which series the whole screen shows. -->
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleModo"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="Analíticas"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_black_soft" />
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnModoIngresos"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="4dp"
+                android:text="Ingresos"
+                android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnModoEgresos"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="4dp"
+                android:text="Egresos"
+                android:textSize="12sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnModoJam"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="4dp"
+                android:text="JAM"
+                android:textSize="12sp" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- Row 2: granularity (left) + period window (right). Weekly and 1M are
+             gated on a backend endpoint that does not exist yet, so they ship
+             disabled ("en desarrollo"). -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleGranularidad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGranMes"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="10dp"
+                    android:text="Mes"
+                    android:textSize="11sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGranSemana"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:enabled="false"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="10dp"
+                    android:text="Semana"
+                    android:textSize="11sp"
+                    android:contentDescription="En desarrollo" />
+
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- Period window selector: controls both monthly charts at once. -->
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/togglePeriodo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPeriodo1M"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:enabled="false"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="8dp"
+                    android:text="1M"
+                    android:textSize="11sp"
+                    android:contentDescription="En desarrollo" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPeriodo3M"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="8dp"
+                    android:text="3M"
+                    android:textSize="11sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPeriodo6M"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="8dp"
+                    android:text="6M"
+                    android:textSize="11sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPeriodo1Y"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingHorizontal="8dp"
+                    android:text="1Y"
+                    android:textSize="11sp" />
+
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        </LinearLayout>
 
     </LinearLayout>
 
