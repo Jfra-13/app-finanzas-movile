@@ -2,13 +2,15 @@
 
 Plan por fases desde el estado actual hasta el producto terminado: funcionalidad completa, UI/UX, rendimiento, seguridad y release.
 
-> **Fuente de verdad del contrato:** [`README-FRONTEND.md`](./README-FRONTEND.md) y Swagger (`http://localhost:9090/swagger-ui.html`). Ante cualquier diferencia, manda Swagger.
+> **Fuente de verdad del contrato:** [`docs/API-CONTRACT.md`](../docs/API-CONTRACT.md) y Swagger (`http://localhost:9090/swagger-ui.html`). Ante cualquier diferencia, manda Swagger.
 
 ---
 
-## Hallazgo crítico (leer antes de empezar)
+## Hallazgo crítico — punto de partida (histórico)
 
-El cliente actual fue construido contra un contrato anterior del backend. Hoy **no coincide** con la API vigente. No es un problema de "faltan pantallas": la capa de datos está desalineada en lo fundamental.
+> Esta sección y la de "inventario" describen el **estado inicial** (pre-refactor) que motivó las Fases 0–3. Ya están resueltas; se conservan para explicar el porqué del plan, no el estado actual.
+
+El cliente original fue construido contra un contrato anterior del backend. Hoy **no coincide** con la API vigente. No es un problema de "faltan pantallas": la capa de datos está desalineada en lo fundamental.
 
 | Aspecto | Estado en el código actual | Contrato real del backend |
 |---|---|---|
@@ -26,9 +28,9 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Estado actual (inventario)
+## Inventario inicial (histórico)
 
-**Existe:**
+**Existía al arrancar:**
 - 11 Activities (Splash, 2 Onboarding, Login, Register, ForgotPassword, Verification, NewPassword, SelectBusiness, Dashboard).
 - `DashboardActivity` modularizada en parciales (`layout_dashboard_*`, `layout_bottom_navigation`).
 - 3 ViewModels (`Login`, `Registro`, `Dashboard`) que llaman a `RetrofitClient` directo.
@@ -47,23 +49,26 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ## Mapa de fases
 
-| Fase | Nombre | Foco | Bloquea a |
-|---|---|---|---|
-| 0 ✅ | Cimientos técnicos | Refactor de estructura, version catalog, ViewBinding, limpieza | Todas |
-| 1 ✅ | Núcleo de red | Envelope, modelo de errores por `code`, interceptores | 2–5 |
-| 2 ✅ | Autenticación y sesión | JWT, refresh rotativo, almacenamiento seguro, `SessionManager` | 4–5 |
-| 3 | Dominio y repositories | Modelos de negocio, `AuthRepository`, `FinanzasRepository`, DI | 4–5 |
-| 4 | Features funcionales | Auth completo, dashboard real, transacciones, metas, categorías | 5–6 |
-| 5 | Analíticas y visualización | Gráficos (semanal, tendencia, categorías), salud financiera | 6 |
-| 6 | UI/UX y design system | Sistema visual, estados, responsive, accesibilidad, dark mode | 7 |
-| 7 | Rendimiento | Paginación, offline/caché, arranque, render | 9 |
-| 8 | Seguridad endurecida | Cleartext off, network security config, R8, pinning | 9 |
-| 9 | Calidad y testing | Unit, repos, UI tests, CI | 10 |
-| 10 | Release | Signing, variantes, Play Store | — |
+**Leyenda de estado:** `✅` terminada · `–` a pulir (funcional, con pendientes) · *(vacío)* sin empezar.
+Estado reflejado según el código al **2026-07-08**.
+
+| Fase | Estado | Nombre | Foco | Bloquea a |
+|---|---|---|---|---|
+| 0 | ✅ | Cimientos técnicos | Refactor de estructura, version catalog, ViewBinding, limpieza | Todas |
+| 1 | ✅ | Núcleo de red | Envelope, modelo de errores por `code`, interceptores | 2–5 |
+| 2 | ✅ | Autenticación y sesión | JWT, refresh rotativo, almacenamiento seguro, `SessionManager` | 4–5 |
+| 3 | ✅ | Dominio y repositories | Modelos de negocio, `AuthRepository`, `FinanzasRepository`, DI Hilt | 4–5 |
+| 4 | – | Features funcionales | Auth completo, dashboard real, transacciones, metas, categorías | 5–6 |
+| 5 | ✅ | Analíticas y visualización | Gráficos (semanal, tendencia, categorías), salud financiera | 6 |
+| 6 | – | UI/UX y design system | Sistema visual, estados, accesibilidad, dark mode; **falta responsive** | 7 |
+| 7 | – | Rendimiento | Paginación e infinite scroll, caché offline, Splash API; **falta sync completa** | 9 |
+| 8 | | Seguridad endurecida | Cleartext off, network security config, R8, pinning | 9 |
+| 9 | | Calidad y testing | Unit, repos, UI tests, CI | 10 |
+| 10 | | Release | Signing, variantes, Play Store | — |
 
 ---
 
-## Fase 0 — Cimientos técnicos
+## Fase 0 ✅ — Cimientos técnicos
 
 **Objetivo:** dejar el proyecto en la estructura objetivo del README principal antes de tocar lógica de negocio. Cambios mecánicos, bajo riesgo, alto retorno.
 
@@ -83,7 +88,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 1 — Núcleo de red
+## Fase 1 ✅ — Núcleo de red
 
 **Objetivo:** que el cliente hable el idioma real del backend: envelope uniforme y decisión por `code`.
 
@@ -104,7 +109,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 2 — Autenticación y sesión
+## Fase 2 ✅ — Autenticación y sesión
 
 **Objetivo:** sesión JWT real, segura y con refresh automático.
 
@@ -124,7 +129,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 3 — Dominio y repositories
+## Fase 3 ✅ — Dominio y repositories
 
 **Objetivo:** desacoplar la UI de Retrofit. La UI habla con ViewModels; los ViewModels con repositories; los repositories con la API.
 
@@ -146,7 +151,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 4 — Features funcionales
+## Fase 4 – — Features funcionales
 
 **Objetivo:** todas las pantallas operando contra el backend real.
 
@@ -171,7 +176,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 5 — Analíticas y visualización
+## Fase 5 ✅ — Analíticas y visualización
 
 **Objetivo:** gráficos alimentados por el JSON listo del backend.
 
@@ -189,7 +194,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 6 — UI/UX y design system
+## Fase 6 – — UI/UX y design system
 
 **Objetivo:** producto pulido y consistente, no pantallas sueltas.
 
@@ -210,7 +215,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 7 — Rendimiento
+## Fase 7 – — Rendimiento
 
 **Objetivo:** fluidez y consumo responsable de red/batería.
 
@@ -230,7 +235,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 8 — Seguridad endurecida
+## Fase 8 — Seguridad endurecida _(pendiente)_
 
 **Objetivo:** cerrar la superficie de ataque antes de release.
 
@@ -251,7 +256,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 9 — Calidad y testing
+## Fase 9 — Calidad y testing _(pendiente)_
 
 **Objetivo:** red de seguridad para iterar sin miedo.
 
@@ -270,7 +275,7 @@ El cliente actual fue construido contra un contrato anterior del backend. Hoy **
 
 ---
 
-## Fase 10 — Release
+## Fase 10 — Release _(pendiente)_
 
 **Objetivo:** publicar.
 

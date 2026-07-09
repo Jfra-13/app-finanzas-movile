@@ -1,103 +1,107 @@
 # Finanzas Independientes — App Android
 
-Aplicación móvil para que trabajadores independientes registren ingresos y controlen su meta mensual mediante una cuota diaria calculada por el backend.
+Aplicación móvil nativa (Kotlin) para que trabajadores independientes registren sus ingresos y
+egresos y controlen su **meta mensual** mediante una **cuota diaria** calculada por el backend.
+Es el cliente móvil de la plataforma Finanzas Independientes; consume una API REST cuyo contrato
+vive en [`docs/API-CONTRACT.md`](docs/API-CONTRACT.md).
+
+## Funcionalidades
+
+- **Autenticación segura** — registro, login y recuperación de contraseña por OTP, con sesión JWT
+  y refresh rotativo. Tokens guardados en almacenamiento cifrado.
+- **Dashboard diario** — termómetro del día, cuota diaria y progreso hacia la meta del mes.
+- **Transacciones** — alta, edición, borrado e historial paginado de ingresos y egresos por categoría.
+- **Metas y categorías** — fijar la meta mensual y gestionar categorías propias además de las base.
+- **Analíticas** — resumen semanal, tendencia mensual, egresos por categoría y panel de salud
+  financiera con señales accionables.
+- **Experiencia** — design system consistente, dark mode, accesibilidad y caché offline-first.
 
 ## Stack
 
-- Kotlin + Android Views (XML), ViewBinding pendiente de adoptar
-- MVVM con `ViewModel` + `StateFlow`
-- Retrofit 2 + Gson para red
-- Backend REST: `api/v1/usuarios`, `api/v1/finanzas`
-- Tests unitarios con JUnit (dominio)
+Kotlin · Android View System (XML + ViewBinding, **no Compose**) · MVVM con Coroutines + `StateFlow` ·
+Retrofit 2 + OkHttp · Room (offline-first) · Hilt (DI) · Vico (gráficos) · EncryptedSharedPreferences.
 
-## Estructura actual
+Arquitectura Clean por capas: **UI → ViewModel → Repository → Retrofit/Room**. El detalle técnico
+completo está en [`planeamiento/ARQUITECTURA.md`](planeamiento/ARQUITECTURA.md).
 
 ```
-app/src/main/java/com/example/finanzas_independientes_app/
-├── LoginActivity.kt                  ← paquete raíz
-├── DashboardActivity.kt              ← paquete raíz
-├── RegisterActivity.kt               ← carpeta raíz, pero declara package .presentation
-├── data/
-│   └── remote/
-│       ├── FinanzasApi.kt
-│       ├── RetrofitClient.kt
-│       └── dto/ (LoginDTO, UsuarioRegistroDTO, TransaccionRegistroDTO)
-├── domain/
-│   └── usecase/CalcularCuotaDiariaUseCase.kt
-└── presentation/
-    ├── SplashActivity, OnboardingOne/Two, ForgotPassword,
-    ├── Verification, NewPassword, SelectBusiness
-    └── LoginViewModel, RegistroViewModel, DashboardViewModel
+core/network   ← Retrofit, envelope ApiResponse, ApiResult, AppError, interceptores, safeApiCall
+core/session   ← SessionManager, tokens en EncryptedSharedPreferences
+data/remote    ← FinanzasApi + DTOs + mappers
+data/local     ← Room (caché offline-first)
+data/repository← *RepositoryImpl (implementan interfaces de dominio)
+domain         ← modelos de negocio, interfaces de repositorio, use cases
+di             ← módulos Hilt
+presentation/<feature> ← Activity + ViewModel (+ Adapter) por feature
 ```
 
-## Problemas detectados
+## Requisitos
 
-1. **Activities dispersas**: `LoginActivity`, `DashboardActivity` y `RegisterActivity` están fuera de `presentation`. `RegisterActivity.kt` además tiene la carpeta y el paquete desincronizados.
-2. **Sin capa repository**: los ViewModels llaman a `RetrofitClient.apiService` directamente. Eso acopla la UI a Retrofit y hace imposible testear los ViewModels sin red.
-3. **`presentation` plana**: todas las pantallas en una sola carpeta. Con 10+ Activities ya no escala.
-4. **Configuración de red hardcodeada**: `BASE_URL` comentada/descomentada a mano en `RetrofitClient`, y `usesCleartextTraffic="true"` global en el manifest.
-5. **Dependencias fuera del version catalog**: Retrofit y Lifecycle declaradas con strings en `build.gradle.kts` mientras el resto usa `libs.*`.
-6. **Recursos huérfanos y con typos**: `activity_main.xml` no tiene Activity asociada; drawables como `cloud_view_log_sing.xml` y `one_boarding_two.png` tienen nombres erróneos.
-7. **Estado de sesión sin centralizar**: el `usuarioId` viaja como parámetro entre pantallas; no hay un lugar único que gestione la sesión.
+| Herramienta | Versión | Nota |
+|---|---|---|
+| JDK | **17** | Exigido por AGP 9. El JDK embebido de Android Studio sirve. |
+| Android Studio | Ladybug o superior | Recomendado; también funciona solo con CLI + SDK. |
+| Android SDK | API 36 (`compileSdk 36`) | Instalar vía SDK Manager. `minSdk 24`. |
+| Gradle | Wrapper | No instalar a mano: usar `./gradlew` (`gradlew.bat` en Windows). |
 
-## Estructura objetivo
+## Quickstart
 
-Se mantiene la separación por capas (`data` / `domain` / `presentation`) y se subdivide `presentation` por feature:
+1. Cloná el repo y abrí la **carpeta raíz** en Android Studio (importa el proyecto Gradle).
+2. Verificá que `local.properties` apunte a tu SDK (Android Studio lo genera; no se commitea):
+   ```properties
+   sdk.dir=C:\\Users\\<tu-usuario>\\AppData\\Local\\Android\\Sdk
+   ```
+3. Esperá el primer **Gradle Sync**.
+4. Elegí un emulador o dispositivo físico y corré ▶ (`Shift+F10`).
 
-```
-app/src/main/java/com/example/finanzas_independientes_app/
-├── core/
-│   ├── network/
-│   │   └── RetrofitClient.kt          ← BASE_URL desde BuildConfig
-│   └── session/
-│       └── SessionManager.kt          ← persistencia del usuarioId (DataStore)
-├── data/
-│   ├── remote/
-│   │   ├── api/FinanzasApi.kt
-│   │   └── dto/
-│   └── repository/
-│       ├── AuthRepository.kt          ← login, registro, recuperación
-│       └── FinanzasRepository.kt      ← transacciones, cuota diaria
-├── domain/
-│   ├── model/                         ← modelos de negocio (no DTOs)
-│   └── usecase/
-│       └── CalcularCuotaDiariaUseCase.kt
-└── presentation/
-    ├── splash/SplashActivity.kt
-    ├── onboarding/
-    │   ├── OnboardingOneActivity.kt
-    │   └── OnboardingTwoActivity.kt
-    ├── auth/
-    │   ├── LoginActivity.kt + LoginViewModel.kt
-    │   ├── RegisterActivity.kt + RegistroViewModel.kt
-    │   ├── ForgotPasswordActivity.kt
-    │   ├── VerificationActivity.kt
-    │   └── NewPasswordActivity.kt
-    ├── business/
-    │   └── SelectBusinessActivity.kt
-    └── dashboard/
-        ├── DashboardActivity.kt
-        └── DashboardViewModel.kt
+Desde la CLI:
+
+```bash
+gradlew.bat :app:assembleDebug        # compilar APK debug (debe quedar en verde en cada PR)
+gradlew.bat :app:installDebug         # instalar en dispositivo/emulador
+gradlew.bat :app:testDebugUnitTest    # tests unitarios
+gradlew.bat clean                     # limpiar build
 ```
 
-Regla general: **la UI habla con ViewModels, los ViewModels con repositories, los repositories con Retrofit**. Nada por encima de `data` conoce a Retrofit.
+> En Unix, reemplazá `gradlew.bat` por `./gradlew`.
 
-## Plan de migración (orden sugerido)
+## Conexión con el backend
 
-| Paso | Cambio | Riesgo |
-|------|--------|--------|
-| 1 | Mover Activities/ViewModels a sus paquetes por feature y corregir el mismatch de `RegisterActivity` | Bajo — refactor de paquetes con el IDE actualiza manifest e imports |
-| 2 | Crear `AuthRepository` y `FinanzasRepository`; los ViewModels reciben el repository (constructor + `ViewModelProvider.Factory`) | Medio |
-| 3 | Mover `RetrofitClient` a `core/network` y sacar `BASE_URL` a `buildConfigField` (debug → `10.0.2.2`, release → URL productiva) | Bajo |
-| 4 | Crear `SessionManager` para el `usuarioId` | Medio |
-| 5 | Pasar Retrofit/Lifecycle al version catalog (`libs.versions.toml`) | Bajo |
-| 6 | Limpieza: eliminar `activity_main.xml`, renombrar drawables con typos | Bajo |
+`BASE_URL` se inyecta por `buildConfigField` según el build type — **nunca hardcodeada**:
 
-Los pasos 1, 3, 5 y 6 son mecánicos y pueden hacerse antes de conectar el backend. Los pasos 2 y 4 conviene hacerlos junto con las próximas conexiones al API para no refactorizar dos veces.
+| Build type | `BASE_URL` | Cuándo |
+|---|---|---|
+| `debug` | `http://10.0.2.2:9090/` | Desarrollo local (alias del `localhost` del host desde el emulador). |
+| `release` | `https://businesscontrol.azurewebsites.net/` | Producción. |
+
+- **Emulador → backend local:** dejá `10.0.2.2:9090` y levantá el backend primero.
+- **Dispositivo físico → backend local:** `10.0.2.2` no resuelve; cambiá el `buildConfigField` de
+  debug a la IP LAN de tu PC (ej. `http://192.168.1.X:9090/`), ambos en la misma red.
+
+El prefijo `/api/v1` lo agrega la capa de red, no la base URL.
+
+## Documentación
+
+| Documento | Contenido |
+|---|---|
+| [`planeamiento/ARQUITECTURA.md`](planeamiento/ARQUITECTURA.md) | Especificación técnica del estado objetivo (capas, red, sesión, offline, DI, testing). |
+| [`planeamiento/PLAN.md`](planeamiento/PLAN.md) | Roadmap por fases con estado (✅ / – / pendiente) y subtareas. |
+| [`docs/API-CONTRACT.md`](docs/API-CONTRACT.md) | Contrato de la API REST (fuente de verdad del cliente). |
+| [`docs/backend-analytics.md`](docs/backend-analytics.md) · [`docs/backend-profile.md`](docs/backend-profile.md) | Requerimientos pedidos al equipo de backend. |
 
 ## Convenciones
 
-- Identificadores y nombres de clases en español, consistente con el código existente.
-- Layouts: `activity_<pantalla>.xml`, parciales reutilizables `layout_<feature>_<bloque>.xml`.
+- Identificadores y clases de dominio en **español**; comentarios/docs en inglés por defecto.
+- El cliente ramifica siempre por el campo `code` de la respuesta, nunca por `message`.
 - DTOs solo en `data/remote/dto`; nunca se exponen a `presentation`.
-- Cada use case de dominio con su test unitario (patrón ya iniciado en `CalcularCuotaDiariaUseCaseTest`).
+- Cada use case de dominio ship con su test unitario.
+- Toda PR deja `gradlew.bat :app:assembleDebug` en verde.
+
+## Troubleshooting
+
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| `Unsupported class file major version` | JDK distinto a 17 | Settings → Build Tools → Gradle → Gradle JDK → 17. |
+| No conecta al backend en emulador | Backend caído o URL incorrecta | Levantar backend en `:9090`; verificar `10.0.2.2`. |
+| No conecta en dispositivo físico | `10.0.2.2` no resuelve | Usar la IP LAN del host en el `buildConfigField` debug. |
+| `SDK location not found` | Falta `local.properties` | Crear con `sdk.dir=<ruta-sdk>`. |
