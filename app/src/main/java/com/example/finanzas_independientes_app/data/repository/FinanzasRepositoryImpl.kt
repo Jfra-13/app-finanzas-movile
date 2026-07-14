@@ -14,10 +14,15 @@ import com.example.finanzas_independientes_app.data.mapper.toDomain
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
 import com.example.finanzas_independientes_app.data.remote.dto.CategoriaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.MetaRequest
+import com.example.finanzas_independientes_app.data.remote.dto.SetPresupuestoRequest
 import com.example.finanzas_independientes_app.data.remote.dto.UpdateCategoriaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.TransaccionRegistroDTO
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.domain.model.ComparacionCategorias
+import com.example.finanzas_independientes_app.domain.model.CompararCon
 import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
+import com.example.finanzas_independientes_app.domain.model.Presupuesto
+import com.example.finanzas_independientes_app.domain.model.ProyeccionMensual
 import com.example.finanzas_independientes_app.domain.model.Meta
 import com.example.finanzas_independientes_app.domain.model.PaginatedTransacciones
 import com.example.finanzas_independientes_app.domain.model.ProgresoMetas
@@ -250,6 +255,54 @@ class FinanzasRepositoryImpl @Inject constructor(
         val result = safeApiCall(gson) { api.obtenerSaludFinanciera() }
         return when (result) {
             is ApiResult.Success -> ApiResult.Success(result.data.map { it.toDomain() }, result.code)
+            is ApiResult.Error -> result
+        }
+    }
+
+    // --- Budgets, comparison & projection ---
+
+    override suspend fun obtenerPresupuestos(): ApiResult<List<Presupuesto>> {
+        val result = safeApiCall(gson) { api.listarPresupuestos() }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.map { it.toDomain() }, result.code)
+            is ApiResult.Error -> result
+        }
+    }
+
+    override suspend fun guardarPresupuesto(
+        categoriaId: Long,
+        montoMensual: Double
+    ): ApiResult<Presupuesto> {
+        val result = safeApiCall(gson) {
+            api.guardarPresupuesto(SetPresupuestoRequest(categoriaId, montoMensual))
+        }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.toDomain(), result.code)
+            is ApiResult.Error -> result
+        }
+    }
+
+    override suspend fun eliminarPresupuesto(id: Long): ApiResult<Unit> =
+        safeUnitCall(gson) { api.eliminarPresupuesto(id) }
+
+    override suspend fun obtenerComparacionCategorias(
+        desde: String?,
+        hasta: String?,
+        compararCon: CompararCon
+    ): ApiResult<ComparacionCategorias> {
+        val result = safeApiCall(gson) {
+            api.obtenerComparacionCategorias(desde, hasta, compararCon.name)
+        }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.toDomain(), result.code)
+            is ApiResult.Error -> result
+        }
+    }
+
+    override suspend fun obtenerProyeccionMensual(): ApiResult<ProyeccionMensual> {
+        val result = safeApiCall(gson) { api.obtenerProyeccionMensual() }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.toDomain(), result.code)
             is ApiResult.Error -> result
         }
     }

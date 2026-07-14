@@ -10,8 +10,12 @@ import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
 import com.example.finanzas_independientes_app.data.remote.dto.MetaDTO
 import com.example.finanzas_independientes_app.data.remote.dto.MetaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.PaginatedTransaccionDTO
+import com.example.finanzas_independientes_app.data.remote.dto.ComparacionCategoriasDTO
 import com.example.finanzas_independientes_app.data.remote.dto.PerfilDTO
+import com.example.finanzas_independientes_app.data.remote.dto.PresupuestoDTO
 import com.example.finanzas_independientes_app.data.remote.dto.ProgresoMetasDTO
+import com.example.finanzas_independientes_app.data.remote.dto.ProyeccionMensualDTO
+import com.example.finanzas_independientes_app.data.remote.dto.SetPresupuestoRequest
 import com.example.finanzas_independientes_app.data.remote.dto.RefreshRequest
 import com.example.finanzas_independientes_app.data.remote.dto.UpdateCategoriaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.UpdatePerfilRequest
@@ -211,4 +215,37 @@ interface FinanzasApi {
 
     @GET("api/v1/finanzas/salud-financiera")
     suspend fun obtenerSaludFinanciera(): Response<ApiResponse<List<SaludFinancieraItemDTO>>>
+
+    // -------------------------------------------------------------------------
+    // Protected — budgets, comparison & projection
+    // -------------------------------------------------------------------------
+
+    /** Upsert a category budget: re-sending the same categoriaId replaces the cap. */
+    @POST("api/v1/finanzas/presupuestos")
+    suspend fun guardarPresupuesto(
+        @Body body: SetPresupuestoRequest
+    ): Response<ApiResponse<PresupuestoDTO>>
+
+    /** All budgets with current-month consumption. */
+    @GET("api/v1/finanzas/presupuestos")
+    suspend fun listarPresupuestos(): Response<ApiResponse<List<PresupuestoDTO>>>
+
+    @DELETE("api/v1/finanzas/presupuestos/{id}")
+    suspend fun eliminarPresupuesto(@Path("id") id: Long): Response<ApiResponse<Unit>>
+
+    /**
+     * Spend per category, current period vs a comparison window. Optional
+     * `desde`/`hasta` (YYYY-MM-DD, inclusive; default = current month to date);
+     * `compararCon` is PERIODO_ANTERIOR (default) or MISMO_PERIODO_ANIO_ANTERIOR.
+     */
+    @GET("api/v1/finanzas/analiticas/comparacion-categorias")
+    suspend fun obtenerComparacionCategorias(
+        @Query("desde") desde: String? = null,
+        @Query("hasta") hasta: String? = null,
+        @Query("compararCon") compararCon: String? = null
+    ): Response<ApiResponse<ComparacionCategoriasDTO>>
+
+    /** Linear run-rate projection for the current month. 404 META_NO_ENCONTRADA if no active goal. */
+    @GET("api/v1/finanzas/proyeccion-mensual")
+    suspend fun obtenerProyeccionMensual(): Response<ApiResponse<ProyeccionMensualDTO>>
 }

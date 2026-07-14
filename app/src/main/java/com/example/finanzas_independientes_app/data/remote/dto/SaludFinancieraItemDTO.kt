@@ -6,5 +6,7 @@ import com.google.gson.annotations.SerializedName
 data class SaludFinancieraItemDTO(
     @SerializedName("tipo") val tipo: String,
     @SerializedName("code") val code: String,
-    @SerializedName("mensaje") val mensaje: String
+    @SerializedName("severidad") val severidad: String,
+    @SerializedName("mensaje") val mensaje: String,
+    @SerializedName("categoriaId") val categoriaId: Long?
 )

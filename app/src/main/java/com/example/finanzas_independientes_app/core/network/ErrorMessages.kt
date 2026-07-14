@@ -20,6 +20,7 @@ fun AppError.toUserMessage(): String = when (this) {
         ApiCode.ACCESO_DENEGADO, ApiCode.FORBIDDEN -> "No tenés permiso para esta acción."
         ApiCode.META_NO_ENCONTRADA -> "Todavía no fijaste una meta este mes."
         ApiCode.CATEGORIA_NO_ENCONTRADA -> "La categoría seleccionada no existe."
+        ApiCode.PRESUPUESTO_NO_ENCONTRADO -> "No se encontró el presupuesto."
         ApiCode.TRANSACCION_NO_ENCONTRADA -> "No se encontró el movimiento."
         ApiCode.USUARIO_NO_ENCONTRADO -> "Usuario no encontrado."
         ApiCode.PARAMETRO_INVALIDO -> "Hay un parámetro inválido en la consulta."

@@ -2,7 +2,11 @@ package com.example.finanzas_independientes_app.domain.repository
 
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.domain.model.ComparacionCategorias
+import com.example.finanzas_independientes_app.domain.model.CompararCon
 import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
+import com.example.finanzas_independientes_app.domain.model.Presupuesto
+import com.example.finanzas_independientes_app.domain.model.ProyeccionMensual
 import com.example.finanzas_independientes_app.domain.model.Meta
 import com.example.finanzas_independientes_app.domain.model.PaginatedTransacciones
 import com.example.finanzas_independientes_app.domain.model.ProgresoMetas
@@ -101,4 +105,24 @@ interface FinanzasRepository {
     suspend fun obtenerIngresosPorDiaSemana(ventana: Int? = null): ApiResult<List<IngresoDiaSemana>>
 
     suspend fun obtenerSaludFinanciera(): ApiResult<List<SaludFinancieraItem>>
+
+    // --- Budgets, comparison & projection ---
+
+    /** All category budgets with current-month consumption. */
+    suspend fun obtenerPresupuestos(): ApiResult<List<Presupuesto>>
+
+    /** Upsert the monthly cap for a category (one budget per category). */
+    suspend fun guardarPresupuesto(categoriaId: Long, montoMensual: Double): ApiResult<Presupuesto>
+
+    suspend fun eliminarPresupuesto(id: Long): ApiResult<Unit>
+
+    /** Spend per category vs a comparison window (null dates = current month to date). */
+    suspend fun obtenerComparacionCategorias(
+        desde: String? = null,
+        hasta: String? = null,
+        compararCon: CompararCon = CompararCon.PERIODO_ANTERIOR
+    ): ApiResult<ComparacionCategorias>
+
+    /** Linear run-rate projection for the current month. */
+    suspend fun obtenerProyeccionMensual(): ApiResult<ProyeccionMensual>
 }
