@@ -29,6 +29,19 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Date range filter: entry point when inactive, active-range badge when set -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipRangoFechas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="Filtrar por fechas"
+            app:chipIcon="@android:drawable/ic_menu_my_calendar"
+            app:closeIconVisible="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <!-- Transaction list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTransacciones"
@@ -41,7 +54,7 @@
             app:layout_constraintBottom_toTopOf="@id/btnLoadMore"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/chipRangoFechas" />
 
         <!-- Load more button -->
         <com.google.android.material.button.MaterialButton
@@ -66,7 +79,7 @@
             app:layout_constraintBottom_toTopOf="@id/btnLoadMore"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/chipRangoFechas" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

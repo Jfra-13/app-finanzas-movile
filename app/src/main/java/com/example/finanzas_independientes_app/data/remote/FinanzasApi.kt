@@ -5,16 +5,21 @@ import com.example.finanzas_independientes_app.data.remote.dto.AuthData
 import com.example.finanzas_independientes_app.data.remote.dto.CategoriaDTO
 import com.example.finanzas_independientes_app.data.remote.dto.CategoriaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.ForgotPasswordRequest
+import com.example.finanzas_independientes_app.data.remote.dto.IngresoDiaSemanaItemDTO
 import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
 import com.example.finanzas_independientes_app.data.remote.dto.MetaDTO
 import com.example.finanzas_independientes_app.data.remote.dto.MetaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.PaginatedTransaccionDTO
+import com.example.finanzas_independientes_app.data.remote.dto.PerfilDTO
 import com.example.finanzas_independientes_app.data.remote.dto.ProgresoMetasDTO
 import com.example.finanzas_independientes_app.data.remote.dto.RefreshRequest
+import com.example.finanzas_independientes_app.data.remote.dto.UpdateCategoriaRequest
+import com.example.finanzas_independientes_app.data.remote.dto.UpdatePerfilRequest
 import com.example.finanzas_independientes_app.data.remote.dto.ResetPasswordRequest
+import com.example.finanzas_independientes_app.data.remote.dto.ResumenDiarioItemDTO
 import com.example.finanzas_independientes_app.data.remote.dto.ResumenSemanalItemDTO
 import com.example.finanzas_independientes_app.data.remote.dto.SaludFinancieraItemDTO
-import com.example.finanzas_independientes_app.data.remote.dto.TendenciaMensualDTO
+import com.example.finanzas_independientes_app.data.remote.dto.TendenciaDTO
 import com.example.finanzas_independientes_app.data.remote.dto.TransaccionRegistroDTO
 import com.example.finanzas_independientes_app.data.remote.dto.UpdateNegocioRequest
 import com.example.finanzas_independientes_app.data.remote.dto.UsuarioRegistroDTO
@@ -57,9 +62,24 @@ interface FinanzasApi {
     @POST("api/v1/usuarios/reset-password")
     suspend fun resetPassword(@Body body: ResetPasswordRequest): Response<ApiResponse<Unit>>
 
+    /**
+     * Revokes the refresh token server-side. Public: owning the refresh token IS
+     * the credential (works with an expired access token). Idempotent — unknown
+     * or already-revoked tokens still return 200 LOGGED_OUT.
+     */
+    @POST("api/v1/usuarios/logout")
+    suspend fun logout(@Body body: RefreshRequest): Response<ApiResponse<Unit>>
+
     // -------------------------------------------------------------------------
     // Protected — user profile (Bearer token injected by AuthInterceptor)
     // -------------------------------------------------------------------------
+
+    @GET("api/v1/usuarios/me")
+    suspend fun obtenerPerfil(): Response<ApiResponse<PerfilDTO>>
+
+    /** Partial update: only fields present in the body change. Returns the updated profile. */
+    @PUT("api/v1/usuarios/me")
+    suspend fun actualizarPerfil(@Body body: UpdatePerfilRequest): Response<ApiResponse<PerfilDTO>>
 
     @PUT("api/v1/usuarios/me/negocio")
     suspend fun actualizarNegocio(@Body body: UpdateNegocioRequest): Response<ApiResponse<Unit>>
@@ -71,10 +91,13 @@ interface FinanzasApi {
     @POST("api/v1/finanzas/transacciones")
     suspend fun registrarTransaccion(@Body body: TransaccionRegistroDTO): Response<ApiResponse<Unit>>
 
+    /** Optional `desde`/`hasta` (YYYY-MM-DD, inclusive) filter by date range. */
     @GET("api/v1/finanzas/transacciones")
     suspend fun listarTransacciones(
         @Query("tipo") tipo: String? = null,
         @Query("categoriaId") categoriaId: Long? = null,
+        @Query("desde") desde: String? = null,
+        @Query("hasta") hasta: String? = null,
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20,
         @Query("sort") sort: String? = null
@@ -112,6 +135,15 @@ interface FinanzasApi {
     @GET("api/v1/finanzas/resumen-semanal")
     suspend fun obtenerResumenSemanal(): Response<ApiResponse<List<ResumenSemanalItemDTO>>>
 
+    /**
+     * Per-day totals for a month (YYYY-MM; omitted = current month). Only days
+     * with activity are returned, ascending by date.
+     */
+    @GET("api/v1/finanzas/resumen-diario")
+    suspend fun obtenerResumenDiario(
+        @Query("mes") mes: String? = null
+    ): Response<ApiResponse<List<ResumenDiarioItemDTO>>>
+
     @GET("api/v1/finanzas/progreso-metas")
     suspend fun obtenerProgresoMetas(): Response<ApiResponse<ProgresoMetasDTO>>
 
@@ -135,38 +167,48 @@ interface FinanzasApi {
     @POST("api/v1/finanzas/categorias")
     suspend fun crearCategoria(@Body body: CategoriaRequest): Response<ApiResponse<CategoriaDTO>>
 
+    /** Renames a category. `tipo` is immutable server-side (would corrupt historical analytics). */
+    @PUT("api/v1/finanzas/categorias/{id}")
+    suspend fun actualizarCategoria(
+        @Path("id") id: Long,
+        @Body body: UpdateCategoriaRequest
+    ): Response<ApiResponse<Unit>>
+
+    /** Deletes a category. Its transactions survive as "uncategorized"; its budgets are removed. */
+    @DELETE("api/v1/finanzas/categorias/{id}")
+    suspend fun eliminarCategoria(@Path("id") id: Long): Response<ApiResponse<Unit>>
+
     // -------------------------------------------------------------------------
     // Protected — analytics (read-only)
     // -------------------------------------------------------------------------
 
+    /** Optional `desde`/`hasta` (YYYY-MM-DD, inclusive); without them = current month. */
     @GET("api/v1/finanzas/resumen-categorias")
-    suspend fun obtenerResumenCategorias(): Response<ApiResponse<Map<String, Double>>>
+    suspend fun obtenerResumenCategorias(
+        @Query("desde") desde: String? = null,
+        @Query("hasta") hasta: String? = null
+    ): Response<ApiResponse<Map<String, Double>>>
 
-    @GET("api/v1/finanzas/tendencia-mensual")
-    suspend fun obtenerTendenciaMensual(
-        @Query("meses") meses: Int? = null
-    ): Response<ApiResponse<TendenciaMensualDTO>>
+    /**
+     * Trend bucketed by week or month over a rolling window (`ventana` periods,
+     * default 6, min 1). Parallel arrays, oldest first; MES labels `yyyy-MM`,
+     * SEMANA labels the week's Monday `yyyy-MM-dd`.
+     */
+    @GET("api/v1/finanzas/tendencia")
+    suspend fun obtenerTendencia(
+        @Query("granularidad") granularidad: String,
+        @Query("ventana") ventana: Int
+    ): Response<ApiResponse<TendenciaDTO>>
+
+    /**
+     * Income aggregated by weekday over the last `ventana` weeks (default 4,
+     * including the current one). Always 7 items, Monday first.
+     */
+    @GET("api/v1/finanzas/ingresos-por-dia-semana")
+    suspend fun obtenerIngresosPorDiaSemana(
+        @Query("ventana") ventana: Int? = null
+    ): Response<ApiResponse<List<IngresoDiaSemanaItemDTO>>>
 
     @GET("api/v1/finanzas/salud-financiera")
     suspend fun obtenerSaludFinanciera(): Response<ApiResponse<List<SaludFinancieraItemDTO>>>
-
-    // -------------------------------------------------------------------------
-    // Fase 2 — EN DESARROLLO (bloqueado por backend)
-    //
-    // The analytics screen exposes weekly granularity ("Semana") and a 1M window,
-    // plus a weekday-earnings breakdown over the selected period. None of these
-    // can be served today: `tendencia-mensual` only buckets by month, and
-    // `resumen-semanal` only covers the current week. The UI ships these controls
-    // disabled until the backend adds:
-    //
-    //   GET api/v1/finanzas/tendencia?granularidad=SEMANA|MES&ventana=N
-    //       -> same shape as TendenciaMensualDTO but bucketed weekly, enabling
-    //          the "Semana" toggle and the 1M window.
-    //   GET api/v1/finanzas/ingresos-por-dia-semana?ventana=N
-    //       -> income aggregated by weekday over the selected window (not just the
-    //          current week), for the "¿Qué día ganás más?" chart.
-    //
-    // When these land: add the endpoints here, DTOs + mappers, repository methods,
-    // then enable btnGranSemana / btnPeriodo1M and wire the window param.
-    // -------------------------------------------------------------------------
 }

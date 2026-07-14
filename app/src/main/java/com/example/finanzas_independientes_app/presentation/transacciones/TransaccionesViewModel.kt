@@ -45,6 +45,11 @@ class TransaccionesViewModel @Inject constructor(
     private val _isLastPage = MutableStateFlow(false)
     val isLastPage: StateFlow<Boolean> = _isLastPage
 
+    // --- Date range filter (ISO yyyy-MM-dd, inclusive; null = no filter) ---
+
+    private val _filtroFechas = MutableStateFlow<Pair<String, String>?>(null)
+    val filtroFechas: StateFlow<Pair<String, String>?> = _filtroFechas
+
     // --- Categories (for the edit dialog spinner) ---
 
     private val _categorias = MutableStateFlow<List<Categoria>>(emptyList())
@@ -70,7 +75,10 @@ class TransaccionesViewModel @Inject constructor(
 
             val page = if (refresh) 0 else _currentPage.value
 
+            val rango = _filtroFechas.value
             when (val result = finanzasRepository.listarTransacciones(
+                desde = rango?.first,
+                hasta = rango?.second,
                 page = page,
                 size = PAGE_SIZE,
                 sort = DEFAULT_SORT
@@ -102,6 +110,23 @@ class TransaccionesViewModel @Inject constructor(
     fun cargarMas() {
         if (_isLastPage.value || _isLoading.value) return
         cargar(refresh = false)
+    }
+
+    /** Applies a date range filter (ISO yyyy-MM-dd) and reloads from page 0. */
+    fun aplicarFiltroFechas(desde: String, hasta: String) {
+        // ISO dates compare lexicographically; guard before hitting the server.
+        if (desde > hasta) {
+            _mensajeError.value = "El rango de fechas no es válido."
+            return
+        }
+        _filtroFechas.value = desde to hasta
+        cargar(refresh = true)
+    }
+
+    fun limpiarFiltroFechas() {
+        if (_filtroFechas.value == null) return
+        _filtroFechas.value = null
+        cargar(refresh = true)
     }
 
     private fun cargarCategorias() {
@@ -170,6 +195,8 @@ class TransaccionesViewModel @Inject constructor(
     private fun mapError(error: AppError): String = when (error) {
         is AppError.Api -> when (error.code) {
             ApiCode.UNAUTHORIZED -> "Sesión expirada. Volvé a iniciar sesión."
+            ApiCode.RANGO_FECHAS_INVALIDO -> "El rango de fechas no es válido."
+            ApiCode.PARAMETRO_INVALIDO -> "Hay un parámetro inválido en la consulta."
             else -> "Error al cargar transacciones."
         }
         is AppError.Network -> "Sin conexión. Verificá tu internet."

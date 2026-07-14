@@ -14,14 +14,17 @@ import com.example.finanzas_independientes_app.data.mapper.toDomain
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
 import com.example.finanzas_independientes_app.data.remote.dto.CategoriaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.MetaRequest
+import com.example.finanzas_independientes_app.data.remote.dto.UpdateCategoriaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.TransaccionRegistroDTO
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Meta
 import com.example.finanzas_independientes_app.domain.model.PaginatedTransacciones
 import com.example.finanzas_independientes_app.domain.model.ProgresoMetas
+import com.example.finanzas_independientes_app.domain.model.ResumenDiarioDia
 import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
 import com.example.finanzas_independientes_app.domain.model.SaludFinancieraItem
-import com.example.finanzas_independientes_app.domain.model.TendenciaMensual
+import com.example.finanzas_independientes_app.domain.model.Tendencia
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
 import com.google.gson.Gson
 import javax.inject.Inject
@@ -51,27 +54,28 @@ class FinanzasRepositoryImpl @Inject constructor(
     override suspend fun listarTransacciones(
         tipo: String?,
         categoriaId: Long?,
+        desde: String?,
+        hasta: String?,
         page: Int,
         size: Int,
         sort: String?
     ): ApiResult<PaginatedTransacciones> {
+        val sinFiltros = tipo == null && categoriaId == null && desde == null && hasta == null
         val result = safeApiCall(gson) {
-            api.listarTransacciones(tipo, categoriaId, page, size, sort)
+            api.listarTransacciones(tipo, categoriaId, desde, hasta, page, size, sort)
         }
         return when (result) {
             is ApiResult.Success -> {
                 val paginated = result.data.toDomain()
                 // Cache only the unfiltered first page as the offline snapshot.
-                if (page == 0 && tipo == null && categoriaId == null) {
+                if (page == 0 && sinFiltros) {
                     transaccionDao.replaceAll(paginated.content.map { it.toEntity() })
                 }
                 ApiResult.Success(paginated, result.code)
             }
             is ApiResult.Error -> {
                 // Offline fallback: serve the cached first page when the network is down.
-                if (result.error is AppError.Network &&
-                    page == 0 && tipo == null && categoriaId == null
-                ) {
+                if (result.error is AppError.Network && page == 0 && sinFiltros) {
                     val cached = transaccionDao.getAll().map { it.toDomain() }
                     if (cached.isNotEmpty()) {
                         ApiResult.Success(
@@ -122,6 +126,14 @@ class FinanzasRepositoryImpl @Inject constructor(
 
     override suspend fun obtenerResumenSemanal(): ApiResult<List<ResumenSemanalDia>> {
         val result = safeApiCall(gson) { api.obtenerResumenSemanal() }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.map { it.toDomain() }, result.code)
+            is ApiResult.Error -> result
+        }
+    }
+
+    override suspend fun obtenerResumenDiario(mes: String?): ApiResult<List<ResumenDiarioDia>> {
+        val result = safeApiCall(gson) { api.obtenerResumenDiario(mes) }
         return when (result) {
             is ApiResult.Success -> ApiResult.Success(result.data.map { it.toDomain() }, result.code)
             is ApiResult.Error -> result
@@ -199,15 +211,37 @@ class FinanzasRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun actualizarCategoria(id: Long, nombre: String): ApiResult<Unit> =
+        safeUnitCall(gson) { api.actualizarCategoria(id, UpdateCategoriaRequest(nombre)) }
+
+    override suspend fun eliminarCategoria(id: Long): ApiResult<Unit> =
+        safeUnitCall(gson) { api.eliminarCategoria(id) }
+
     // --- Analytics (read-only) ---
 
-    override suspend fun obtenerResumenCategorias(): ApiResult<Map<String, Double>> =
-        safeApiCall(gson) { api.obtenerResumenCategorias() }
+    override suspend fun obtenerResumenCategorias(
+        desde: String?,
+        hasta: String?
+    ): ApiResult<Map<String, Double>> =
+        safeApiCall(gson) { api.obtenerResumenCategorias(desde, hasta) }
 
-    override suspend fun obtenerTendenciaMensual(meses: Int?): ApiResult<TendenciaMensual> {
-        val result = safeApiCall(gson) { api.obtenerTendenciaMensual(meses) }
+    override suspend fun obtenerTendencia(
+        granularidad: String,
+        ventana: Int
+    ): ApiResult<Tendencia> {
+        val result = safeApiCall(gson) { api.obtenerTendencia(granularidad, ventana) }
         return when (result) {
             is ApiResult.Success -> ApiResult.Success(result.data.toDomain(), result.code)
+            is ApiResult.Error -> result
+        }
+    }
+
+    override suspend fun obtenerIngresosPorDiaSemana(
+        ventana: Int?
+    ): ApiResult<List<IngresoDiaSemana>> {
+        val result = safeApiCall(gson) { api.obtenerIngresosPorDiaSemana(ventana) }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.map { it.toDomain() }, result.code)
             is ApiResult.Error -> result
         }
     }

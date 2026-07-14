@@ -17,8 +17,13 @@ import com.example.finanzas_independientes_app.databinding.DialogEditTransaction
 import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
+import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @AndroidEntryPoint
 class TransaccionesActivity : AppCompatActivity() {
@@ -116,6 +121,19 @@ class TransaccionesActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
+            viewModel.filtroFechas.collect { rango ->
+                if (rango == null) {
+                    binding.chipRangoFechas.text = "Filtrar por fechas"
+                    binding.chipRangoFechas.isCloseIconVisible = false
+                } else {
+                    binding.chipRangoFechas.text =
+                        "${displayDate(rango.first)} – ${displayDate(rango.second)}"
+                    binding.chipRangoFechas.isCloseIconVisible = true
+                }
+            }
+        }
+
+        lifecycleScope.launch {
             viewModel.mensajeError.collect { error ->
                 if (error != null) {
                     stateHelper.showError(error) { viewModel.limpiarError() }
@@ -130,7 +148,31 @@ class TransaccionesActivity : AppCompatActivity() {
         binding.btnLoadMore.setOnClickListener {
             viewModel.cargarMas()
         }
+        binding.chipRangoFechas.setOnClickListener { showRangePicker() }
+        binding.chipRangoFechas.setOnCloseIconClickListener { viewModel.limpiarFiltroFechas() }
     }
+
+    // --- Date range filter ---
+
+    private fun showRangePicker() {
+        val picker = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText("Filtrar por fechas")
+            .build()
+        picker.addOnPositiveButtonClickListener { range ->
+            viewModel.aplicarFiltroFechas(isoDate(range.first), isoDate(range.second))
+        }
+        picker.show(supportFragmentManager, "rango_fechas")
+    }
+
+    // MaterialDatePicker returns UTC-midnight millis; format in UTC to keep the picked day.
+    private fun isoDate(utcMillis: Long): String =
+        SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            .apply { timeZone = TimeZone.getTimeZone("UTC") }
+            .format(Date(utcMillis))
+
+    /** yyyy-MM-dd → dd/MM/yy for the chip label. */
+    private fun displayDate(iso: String): String =
+        "${iso.substring(8, 10)}/${iso.substring(5, 7)}/${iso.substring(2, 4)}"
 
     // --- Edit dialog ---
 

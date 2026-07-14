@@ -6,9 +6,9 @@ import com.example.finanzas_independientes_app.core.network.ApiCode
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.core.network.AppError
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Meta
-import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
-import com.example.finanzas_independientes_app.domain.model.TendenciaMensual
+import com.example.finanzas_independientes_app.domain.model.Tendencia
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,11 +23,11 @@ class AnalyticsViewModel @Inject constructor(
     private val finanzasRepository: FinanzasRepository
 ) : ViewModel() {
 
-    private val _resumenSemanal = MutableStateFlow<List<ResumenSemanalDia>>(emptyList())
-    val resumenSemanal: StateFlow<List<ResumenSemanalDia>> = _resumenSemanal
+    private val _ingresosDiaSemana = MutableStateFlow<List<IngresoDiaSemana>>(emptyList())
+    val ingresosDiaSemana: StateFlow<List<IngresoDiaSemana>> = _ingresosDiaSemana
 
-    private val _tendenciaMensual = MutableStateFlow<TendenciaMensual?>(null)
-    val tendenciaMensual: StateFlow<TendenciaMensual?> = _tendenciaMensual
+    private val _tendencia = MutableStateFlow<Tendencia?>(null)
+    val tendencia: StateFlow<Tendencia?> = _tendencia
 
     private val _resumenCategorias = MutableStateFlow<Map<String, Double>>(emptyMap())
     val resumenCategorias: StateFlow<Map<String, Double>> = _resumenCategorias
@@ -45,9 +45,15 @@ class AnalyticsViewModel @Inject constructor(
     private val _mensajeUI = MutableStateFlow<String?>(null)
     val mensajeUI: StateFlow<String?> = _mensajeUI
 
-    /** Months window for the monthly-trend chart; changed by the segmented toggle. */
-    private val _mesesTendencia = MutableStateFlow(DEFAULT_MESES)
-    val mesesTendencia: StateFlow<Int> = _mesesTendencia
+    /** Period window in months (1/3/6/12) for the trend charts; segmented toggle. */
+    private val _periodoMeses = MutableStateFlow(DEFAULT_MESES)
+
+    /** Trend bucketing; SEMANA translates the month window into weeks. */
+    private val _granularidad = MutableStateFlow(Granularidad.MES)
+    val granularidad: StateFlow<Granularidad> = _granularidad
+
+    /** Weeks window for the weekday-earnings chart (default 4). */
+    private val _ventanaSemanas = MutableStateFlow(DEFAULT_VENTANA_SEMANAS)
 
     /**
      * Active lens: which series the whole screen shows. Pure UI state — the data
@@ -73,19 +79,22 @@ class AnalyticsViewModel @Inject constructor(
             _isLoading.value = true
             _errorMessage.value = null
 
-            val deferredSemanal = async { finanzasRepository.obtenerResumenSemanal() }
-            val deferredTendencia = async { finanzasRepository.obtenerTendenciaMensual(_mesesTendencia.value) }
+            val deferredDiaSemana =
+                async { finanzasRepository.obtenerIngresosPorDiaSemana(_ventanaSemanas.value) }
+            val deferredTendencia = async {
+                finanzasRepository.obtenerTendencia(_granularidad.value.name, ventanaTendencia())
+            }
             val deferredCategorias = async { finanzasRepository.obtenerResumenCategorias() }
             val deferredCats = async { finanzasRepository.listarCategorias() }
             val deferredMeta = async { finanzasRepository.obtenerMetaActual() }
 
-            when (val r = deferredSemanal.await()) {
-                is ApiResult.Success -> _resumenSemanal.value = r.data
+            when (val r = deferredDiaSemana.await()) {
+                is ApiResult.Success -> _ingresosDiaSemana.value = r.data
                 is ApiResult.Error -> _errorMessage.value = handleError(r.error)
             }
 
             when (val r = deferredTendencia.await()) {
-                is ApiResult.Success -> _tendenciaMensual.value = r.data
+                is ApiResult.Success -> _tendencia.value = r.data
                 is ApiResult.Error -> _errorMessage.value = handleError(r.error)
             }
 
@@ -120,16 +129,47 @@ class AnalyticsViewModel @Inject constructor(
         _modo.value = modo
     }
 
-    /** Reloads only the monthly-trend chart with a new months window. */
-    fun cambiarMesesTendencia(meses: Int) {
-        if (meses == _mesesTendencia.value) return
-        _mesesTendencia.value = meses
+    /** Reloads only the trend charts with a new period window (months: 1/3/6/12). */
+    fun cambiarPeriodo(meses: Int) {
+        if (meses == _periodoMeses.value) return
+        _periodoMeses.value = meses
+        recargarTendencia()
+    }
+
+    /** Switches trend bucketing between MES and SEMANA and refetches. */
+    fun cambiarGranularidad(granularidad: Granularidad) {
+        if (granularidad == _granularidad.value) return
+        _granularidad.value = granularidad
+        recargarTendencia()
+    }
+
+    /** Reloads only the weekday-earnings chart with a new weeks window. */
+    fun cambiarVentanaSemanas(semanas: Int) {
+        if (semanas == _ventanaSemanas.value) return
+        _ventanaSemanas.value = semanas
         viewModelScope.launch {
-            when (val r = finanzasRepository.obtenerTendenciaMensual(meses)) {
-                is ApiResult.Success -> _tendenciaMensual.value = r.data
+            when (val r = finanzasRepository.obtenerIngresosPorDiaSemana(semanas)) {
+                is ApiResult.Success -> _ingresosDiaSemana.value = r.data
                 is ApiResult.Error -> _errorMessage.value = handleError(r.error)
             }
         }
+    }
+
+    private fun recargarTendencia() {
+        viewModelScope.launch {
+            when (val r =
+                finanzasRepository.obtenerTendencia(_granularidad.value.name, ventanaTendencia())
+            ) {
+                is ApiResult.Success -> _tendencia.value = r.data
+                is ApiResult.Error -> _errorMessage.value = handleError(r.error)
+            }
+        }
+    }
+
+    /** The month window expressed in the active granularity's periods. */
+    private fun ventanaTendencia(): Int = when (_granularidad.value) {
+        Granularidad.MES -> _periodoMeses.value
+        Granularidad.SEMANA -> SEMANAS_POR_MES.getValue(_periodoMeses.value)
     }
 
     /**
@@ -212,9 +252,16 @@ class AnalyticsViewModel @Inject constructor(
 
     private companion object {
         const val DEFAULT_MESES = 6
+        const val DEFAULT_VENTANA_SEMANAS = 4
         const val DETALLE_PAGE_SIZE = 50
+
+        /** 1M/3M/6M/1Y expressed in whole weeks for weekly bucketing. */
+        val SEMANAS_POR_MES = mapOf(1 to 4, 3 to 13, 6 to 26, 12 to 52)
     }
 }
+
+/** Trend bucketing accepted by GET /tendencia; enum names match the API values. */
+enum class Granularidad { SEMANA, MES }
 
 /**
  * The active lens for the analytics screen.

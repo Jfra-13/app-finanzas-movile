@@ -20,9 +20,9 @@ import com.example.finanzas_independientes_app.presentation.common.AddTransactio
 import com.example.finanzas_independientes_app.presentation.common.BottomNav
 import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
 import com.example.finanzas_independientes_app.presentation.transacciones.TransaccionAdapter
+import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Meta
-import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
-import com.example.finanzas_independientes_app.domain.model.TendenciaMensual
+import com.example.finanzas_independientes_app.domain.model.Tendencia
 import com.example.finanzas_independientes_app.domain.usecase.ProyectarTendenciaUseCase
 import com.patrykandpatrick.vico.views.cartesian.CartesianChart
 import com.patrykandpatrick.vico.views.cartesian.axis.HorizontalAxis
@@ -74,8 +74,8 @@ class AnalyticsActivity : AppCompatActivity() {
     private var weekdayLabels: List<String> = emptyList()
 
     // Latest data cached so a mode switch can re-render without a re-fetch.
-    private var tendencia: TendenciaMensual? = null
-    private var semanal: List<ResumenSemanalDia> = emptyList()
+    private var tendencia: Tendencia? = null
+    private var diaSemana: List<IngresoDiaSemana> = emptyList()
     private var categorias: Map<String, Double> = emptyMap()
     private var meta: Meta? = null
 
@@ -271,22 +271,35 @@ class AnalyticsActivity : AppCompatActivity() {
             viewModel.cambiarModo(modo)
         }
 
-        // Period window — drives both monthly charts. Check default before wiring
+        // Period window — drives both trend charts. Check default before wiring
         // to avoid a spurious reload.
         binding.togglePeriodo.check(R.id.btnPeriodo6M)
         binding.togglePeriodo.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked) return@addOnButtonCheckedListener
             val meses = when (checkedId) {
+                R.id.btnPeriodo1M -> 1
                 R.id.btnPeriodo3M -> 3
                 R.id.btnPeriodo1Y -> 12
                 else -> 6
             }
-            viewModel.cambiarMesesTendencia(meses)
+            viewModel.cambiarPeriodo(meses)
         }
 
-        // Granularity: only "Mes" is wired; "Semana" is disabled pending a backend
-        // weekly-trend endpoint (see FinanzasApi TODO).
+        // Trend bucketing: month vs week (weeks are labeled by their Monday).
         binding.toggleGranularidad.check(R.id.btnGranMes)
+        binding.toggleGranularidad.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            viewModel.cambiarGranularidad(
+                if (checkedId == R.id.btnGranSemana) Granularidad.SEMANA else Granularidad.MES
+            )
+        }
+
+        // Weeks window for the weekday-earnings chart.
+        binding.toggleVentanaSemanas.check(R.id.btnVentana4S)
+        binding.toggleVentanaSemanas.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            viewModel.cambiarVentanaSemanas(if (checkedId == R.id.btnVentana12S) 12 else 4)
+        }
     }
 
     private fun bindFlows() {
@@ -307,15 +320,15 @@ class AnalyticsActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.tendenciaMensual.collect {
+            viewModel.tendencia.collect {
                 tendencia = it
                 renderAll()
             }
         }
 
         lifecycleScope.launch {
-            viewModel.resumenSemanal.collect {
-                semanal = it
+            viewModel.ingresosDiaSemana.collect {
+                diaSemana = it
                 renderAll()
             }
         }
@@ -360,20 +373,20 @@ class AnalyticsActivity : AppCompatActivity() {
         val modo = viewModel.modo.value
         renderBalance(modo, tendencia)
         renderNeto(modo, tendencia)
-        renderThird(modo, semanal, categorias)
+        renderThird(modo, diaSemana, categorias)
     }
 
     // --- Chart renderers ---
 
-    private fun renderBalance(modo: ModoAnalytics, t: TendenciaMensual?) {
-        if (t == null || t.meses.isEmpty()) {
+    private fun renderBalance(modo: ModoAnalytics, t: Tendencia?) {
+        if (t == null || t.periodos.isEmpty()) {
             binding.chartBalance.visibility = View.GONE
             binding.tvBalanceEmpty.visibility = View.VISIBLE
             return
         }
         binding.chartBalance.visibility = View.VISIBLE
         binding.tvBalanceEmpty.visibility = View.GONE
-        monthLabels = t.meses.map(::shortMonth)
+        monthLabels = t.periodos.map(::shortPeriod)
 
         binding.tvBalanceSubtitle.text = when (modo) {
             ModoAnalytics.INGRESOS -> "Ingresos por mes"
@@ -416,18 +429,18 @@ class AnalyticsActivity : AppCompatActivity() {
         }
     }
 
-    private fun renderNeto(modo: ModoAnalytics, t: TendenciaMensual?) {
-        if (t == null || t.meses.isEmpty()) {
+    private fun renderNeto(modo: ModoAnalytics, t: Tendencia?) {
+        if (t == null || t.periodos.isEmpty()) {
             binding.chartNeto.visibility = View.GONE
             binding.tvNetoEmpty.visibility = View.VISIBLE
             return
         }
         binding.chartNeto.visibility = View.VISIBLE
         binding.tvNetoEmpty.visibility = View.GONE
-        monthLabels = t.meses.map(::shortMonth)
+        monthLabels = t.periodos.map(::shortPeriod)
 
         // Per-mode series: the raw side in single modes, the net in JAM.
-        val values = t.meses.indices.map { i ->
+        val values = t.periodos.indices.map { i ->
             val ing = t.ingresos.getOrElse(i) { 0.0 }
             val egr = t.egresos.getOrElse(i) { 0.0 }
             when (modo) {
@@ -482,28 +495,30 @@ class AnalyticsActivity : AppCompatActivity() {
      */
     private fun renderThird(
         modo: ModoAnalytics,
-        dias: List<ResumenSemanalDia>,
+        dias: List<IngresoDiaSemana>,
         cats: Map<String, Double>,
     ) {
         if (modo == ModoAnalytics.EGRESOS) {
             binding.tvThirdTitle.text = "Ranking de categorías"
             binding.tvThirdSubtitle.text = "En qué se va tu dinero este mes"
             binding.chartWeekday.visibility = View.GONE
+            binding.toggleVentanaSemanas.visibility = View.GONE
             renderCategoryRanking(cats)
         } else {
             binding.tvThirdTitle.text = "¿Qué día ganás más?"
             binding.tvThirdSubtitle.text = "Ingreso por día de la semana"
             binding.rvCategoryRanking.visibility = View.GONE
+            binding.toggleVentanaSemanas.visibility = View.VISIBLE
             renderWeekday(dias)
         }
     }
 
-    private fun renderWeekday(dias: List<ResumenSemanalDia>) {
+    private fun renderWeekday(dias: List<IngresoDiaSemana>) {
         val withIncome = dias.filter { it.ingresos > 0 }
         if (withIncome.isEmpty()) {
             binding.chartWeekday.visibility = View.GONE
             binding.tvThirdEmpty.visibility = View.VISIBLE
-            binding.tvThirdEmpty.text = "Sin ingresos esta semana"
+            binding.tvThirdEmpty.text = "Sin ingresos en este período"
             return
         }
         binding.chartWeekday.visibility = View.VISIBLE
@@ -608,15 +623,21 @@ class AnalyticsActivity : AppCompatActivity() {
 
     private fun color(res: Int): Int = ContextCompat.getColor(this, res)
 
-    /** "2026-05" -> "may". Falls back to the raw string if it is not a yyyy-MM key. */
-    private fun shortMonth(raw: String): String {
-        val mm = raw.substringAfter('-', "").toIntOrNull() ?: return raw
-        return MESES.getOrElse(mm - 1) { raw }
+    /**
+     * Axis label for a trend period: "2026-05" -> "may" (monthly) and
+     * "2026-05-12" -> "12 may" (weekly, labeled by the week's Monday).
+     * Falls back to the raw string on any unexpected shape.
+     */
+    private fun shortPeriod(raw: String): String {
+        val parts = raw.split('-')
+        val mes = parts.getOrNull(1)?.toIntOrNull()?.let { MESES.getOrNull(it - 1) } ?: return raw
+        val dia = parts.getOrNull(2)?.toIntOrNull()
+        return if (dia != null) "$dia $mes" else mes
     }
 
-    /** First three letters of a weekday label, capitalised. */
+    /** First three letters of a weekday label ("MIERCOLES" -> "Mie"). */
     private fun shortDay(raw: String): String =
-        raw.take(3).replaceFirstChar { it.uppercase() }
+        raw.take(3).lowercase().replaceFirstChar { it.uppercase() }
 
     /** Compact amount for axis/data labels: "1.2k" past a thousand, else "800". No currency symbol. */
     private fun formatShort(value: Double): String {

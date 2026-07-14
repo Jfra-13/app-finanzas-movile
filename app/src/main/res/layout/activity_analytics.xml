@@ -170,7 +170,42 @@
                         android:text="Ingreso por día de la semana"
                         android:textSize="12sp"
                         android:textColor="@color/text_gray"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- Weeks window for the weekday-earnings aggregation. -->
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleVentanaSemanas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:singleSelection="true"
+                        app:selectionRequired="true">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnVentana4S"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:minWidth="0dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="10dp"
+                            android:text="4 sem"
+                            android:textSize="11sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnVentana12S"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:minWidth="0dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:paddingHorizontal="10dp"
+                            android:text="12 sem"
+                            android:textSize="11sp" />
+
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
 
                     <!-- Weekday-earnings chart (INGRESOS / JAM). -->
                     <com.patrykandpatrick.vico.views.cartesian.CartesianChartView
@@ -309,13 +344,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:minWidth="0dp"
-                    android:enabled="false"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:paddingHorizontal="10dp"
                     android:text="Semana"
-                    android:textSize="11sp"
-                    android:contentDescription="En desarrollo" />
+                    android:textSize="11sp" />
 
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -338,13 +371,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:minWidth="0dp"
-                    android:enabled="false"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
                     android:paddingHorizontal="8dp"
                     android:text="1M"
-                    android:textSize="11sp"
-                    android:contentDescription="En desarrollo" />
+                    android:textSize="11sp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPeriodo3M"

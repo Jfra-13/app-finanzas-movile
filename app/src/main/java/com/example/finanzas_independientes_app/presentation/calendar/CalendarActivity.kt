@@ -68,26 +68,27 @@ class CalendarActivity : AppCompatActivity() {
 
     private fun bindCalendar() {
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            renderDetail(year, month, dayOfMonth)
+            val label = Calendar.getInstance().apply { clear(); set(year, month, dayOfMonth) }.time
+            binding.tvDetailDate.text =
+                dateFormat.format(label).replaceFirstChar { it.uppercase() }
+            viewModel.seleccionar(year, month, dayOfMonth)
         }
-    }
-
-    private fun renderDetail(year: Int, month: Int, dayOfMonth: Int) {
-        val label = Calendar.getInstance().apply { clear(); set(year, month, dayOfMonth) }.time
-        binding.tvDetailDate.text = dateFormat.format(label).replaceFirstChar { it.uppercase() }
-
-        val detail = viewModel.detalleDe(year, month, dayOfMonth)
-        if (detail.conDatos) {
-            binding.tvDetailEmpty.visibility = View.GONE
-            binding.detailStatsRow.visibility = View.VISIBLE
-            binding.tvDetailIngreso.text = soles(detail.ingresos)
-            binding.tvDetailEgreso.text = soles(detail.egresos)
-            binding.tvDetailEstimado.text = soles(detail.estimado)
-        } else {
-            binding.detailStatsRow.visibility = View.GONE
-            binding.tvDetailEmpty.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            viewModel.detalle.collect { detail ->
+                if (detail == null) return@collect
+                if (detail.conDatos) {
+                    binding.tvDetailEmpty.visibility = View.GONE
+                    binding.detailStatsRow.visibility = View.VISIBLE
+                    binding.tvDetailIngreso.text = soles(detail.ingresos)
+                    binding.tvDetailEgreso.text = soles(detail.egresos)
+                    binding.tvDetailEstimado.text = soles(detail.estimado)
+                } else {
+                    binding.detailStatsRow.visibility = View.GONE
+                    binding.tvDetailEmpty.visibility = View.VISIBLE
+                }
+                binding.dayDetailCard.visibility = View.VISIBLE
+            }
         }
-        binding.dayDetailCard.visibility = View.VISIBLE
     }
 
     private fun bindNav() {

@@ -3,71 +3,77 @@ package com.example.finanzas_independientes_app.presentation.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finanzas_independientes_app.core.network.ApiResult
-import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
+import com.example.finanzas_independientes_app.domain.model.ResumenDiarioDia
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Locale
 import javax.inject.Inject
 
 /**
- * Backs the calendar day-detail. The backend has no per-date transaction endpoint,
- * so real figures exist only for the current week (weekly summary) with the daily
- * goal as the "estimate". Any other day resolves to [DayDetail.conDatos] = false.
+ * Backs the calendar day-detail with GET /finanzas/resumen-diario, cached per
+ * month for the lifetime of the screen. A day absent from the summary simply
+ * had no activity (zeros); [DayDetail.conDatos] = false only when the month
+ * could not be fetched.
  */
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
     private val finanzasRepository: FinanzasRepository
 ) : ViewModel() {
 
-    private val _cargado = MutableStateFlow(false)
-    val cargado: StateFlow<Boolean> = _cargado
+    private val _detalle = MutableStateFlow<DayDetail?>(null)
+    val detalle: StateFlow<DayDetail?> = _detalle
 
-    private var resumenSemanal: List<ResumenSemanalDia> = emptyList()
+    // "yyyy-MM" -> day totals keyed by "yyyy-MM-dd". Failed fetches are not cached.
+    private val meses = mutableMapOf<String, Map<String, ResumenDiarioDia>>()
     private var metaDiaria: Double = 0.0
 
     fun cargar() {
         viewModelScope.launch {
-            when (val r = finanzasRepository.obtenerResumenSemanal()) {
-                is ApiResult.Success -> resumenSemanal = r.data
-                is ApiResult.Error -> resumenSemanal = emptyList()
-            }
             when (val r = finanzasRepository.obtenerProgresoMetas()) {
                 is ApiResult.Success -> metaDiaria = r.data.metaDiaria
                 is ApiResult.Error -> metaDiaria = 0.0
             }
-            _cargado.value = true
+            cargarMes(mesActual())
         }
     }
 
     /** Resolves the detail for a picked date (CalendarView gives 0-based month). */
-    fun detalleDe(year: Int, month: Int, dayOfMonth: Int): DayDetail {
-        val selected = Calendar.getInstance().apply {
-            firstDayOfWeek = Calendar.MONDAY
-            clear()
-            set(year, month, dayOfMonth)
+    fun seleccionar(year: Int, month: Int, dayOfMonth: Int) {
+        val mes = String.format(Locale.US, "%04d-%02d", year, month + 1)
+        val fecha = String.format(Locale.US, "%s-%02d", mes, dayOfMonth)
+        viewModelScope.launch {
+            val dias = cargarMes(mes)
+            _detalle.value = if (dias != null) {
+                val dia = dias[fecha]
+                DayDetail(
+                    ingresos = dia?.ingresos ?: 0.0,
+                    egresos = dia?.egresos ?: 0.0,
+                    estimado = metaDiaria,
+                    conDatos = true
+                )
+            } else {
+                DayDetail(conDatos = false)
+            }
         }
-        val today = Calendar.getInstance().apply { firstDayOfWeek = Calendar.MONDAY }
+    }
 
-        val mismaSemana = selected.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
-            selected.get(Calendar.WEEK_OF_YEAR) == today.get(Calendar.WEEK_OF_YEAR)
-
-        // Calendar.DAY_OF_WEEK: Sunday=1..Saturday=7 → Monday-based index 0..6.
-        val dayIndex = (selected.get(Calendar.DAY_OF_WEEK) + 5) % 7
-
-        return if (mismaSemana && dayIndex < resumenSemanal.size) {
-            val dia = resumenSemanal[dayIndex]
-            DayDetail(
-                ingresos = dia.ingresos,
-                egresos = dia.egresos,
-                estimado = metaDiaria,
-                conDatos = true
-            )
-        } else {
-            DayDetail(conDatos = false)
+    private suspend fun cargarMes(mes: String): Map<String, ResumenDiarioDia>? {
+        meses[mes]?.let { return it }
+        return when (val r = finanzasRepository.obtenerResumenDiario(mes)) {
+            is ApiResult.Success -> r.data.associateBy { it.fecha }.also { meses[mes] = it }
+            is ApiResult.Error -> null
         }
+    }
+
+    private fun mesActual(): String {
+        val hoy = Calendar.getInstance()
+        return String.format(
+            Locale.US, "%04d-%02d", hoy.get(Calendar.YEAR), hoy.get(Calendar.MONTH) + 1
+        )
     }
 }
 

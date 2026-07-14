@@ -2,12 +2,14 @@ package com.example.finanzas_independientes_app.domain.repository
 
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Meta
 import com.example.finanzas_independientes_app.domain.model.PaginatedTransacciones
 import com.example.finanzas_independientes_app.domain.model.ProgresoMetas
+import com.example.finanzas_independientes_app.domain.model.ResumenDiarioDia
 import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
 import com.example.finanzas_independientes_app.domain.model.SaludFinancieraItem
-import com.example.finanzas_independientes_app.domain.model.TendenciaMensual
+import com.example.finanzas_independientes_app.domain.model.Tendencia
 
 /**
  * Contract for all finanzas-domain network operations.
@@ -28,6 +30,8 @@ interface FinanzasRepository {
     suspend fun listarTransacciones(
         tipo: String? = null,
         categoriaId: Long? = null,
+        desde: String? = null,
+        hasta: String? = null,
         page: Int = 0,
         size: Int = 20,
         sort: String? = null
@@ -56,6 +60,9 @@ interface FinanzasRepository {
 
     suspend fun obtenerResumenSemanal(): ApiResult<List<ResumenSemanalDia>>
 
+    /** Per-day totals for a month (YYYY-MM; null = current month). Only days with activity. */
+    suspend fun obtenerResumenDiario(mes: String? = null): ApiResult<List<ResumenDiarioDia>>
+
     suspend fun obtenerProgresoMetas(): ApiResult<ProgresoMetas>
 
     // --- Goals ---
@@ -70,12 +77,28 @@ interface FinanzasRepository {
 
     suspend fun crearCategoria(nombre: String, tipo: String): ApiResult<Categoria>
 
+    /** Renames a category. `tipo` is immutable server-side. */
+    suspend fun actualizarCategoria(id: Long, nombre: String): ApiResult<Unit>
+
+    /** Deletes a category; its transactions become uncategorized on the server. */
+    suspend fun eliminarCategoria(id: Long): ApiResult<Unit>
+
     // --- Analytics (read-only) ---
 
-    /** Returns monthly expense totals grouped by category name. */
-    suspend fun obtenerResumenCategorias(): ApiResult<Map<String, Double>>
+    /**
+     * Expense totals grouped by category name, over an optional inclusive
+     * YYYY-MM-DD range; without params it covers the current month.
+     */
+    suspend fun obtenerResumenCategorias(
+        desde: String? = null,
+        hasta: String? = null
+    ): ApiResult<Map<String, Double>>
 
-    suspend fun obtenerTendenciaMensual(meses: Int? = null): ApiResult<TendenciaMensual>
+    /** Trend bucketed by `granularidad` (SEMANA|MES) over the last `ventana` periods. */
+    suspend fun obtenerTendencia(granularidad: String, ventana: Int): ApiResult<Tendencia>
+
+    /** Income per weekday over the last `ventana` weeks (null = server default of 4). */
+    suspend fun obtenerIngresosPorDiaSemana(ventana: Int? = null): ApiResult<List<IngresoDiaSemana>>
 
     suspend fun obtenerSaludFinanciera(): ApiResult<List<SaludFinancieraItem>>
 }
