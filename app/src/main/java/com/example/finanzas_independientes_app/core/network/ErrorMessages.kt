@@ -22,6 +22,8 @@ fun AppError.toUserMessage(): String = when (this) {
         ApiCode.CATEGORIA_NO_ENCONTRADA -> "La categoría seleccionada no existe."
         ApiCode.TRANSACCION_NO_ENCONTRADA -> "No se encontró el movimiento."
         ApiCode.USUARIO_NO_ENCONTRADO -> "Usuario no encontrado."
+        ApiCode.PARAMETRO_INVALIDO -> "Hay un parámetro inválido en la consulta."
+        ApiCode.RANGO_FECHAS_INVALIDO -> "El rango de fechas no es válido."
         else -> message ?: "No se pudo completar la operación."
     }
 }
