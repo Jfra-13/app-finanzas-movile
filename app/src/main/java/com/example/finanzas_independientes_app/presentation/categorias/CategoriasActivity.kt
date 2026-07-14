@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.finanzas_independientes_app.R
 import com.example.finanzas_independientes_app.databinding.ActivityCategoriasBinding
 import com.example.finanzas_independientes_app.databinding.DialogCreateCategoriaBinding
+import com.example.finanzas_independientes_app.databinding.DialogInputTextBinding
+import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -45,7 +47,7 @@ class CategoriasActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = CategoriaAdapter()
+        adapter = CategoriaAdapter { categoria -> showOptionsDialog(categoria) }
         binding.rvCategorias.layoutManager = LinearLayoutManager(this)
         binding.rvCategorias.adapter = adapter
     }
@@ -126,5 +128,51 @@ class CategoriasActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    // --- Edit / delete ---
+
+    // System categories also open this dialog; the backend answers 403 and the
+    // ViewModel surfaces a clear message (the DTO carries no "system" flag yet).
+    private fun showOptionsDialog(categoria: Categoria) {
+        AlertDialog.Builder(this)
+            .setTitle(categoria.nombre)
+            .setItems(arrayOf("Renombrar", "Eliminar")) { _, which ->
+                when (which) {
+                    0 -> showRenameDialog(categoria)
+                    1 -> confirmDelete(categoria)
+                }
+            }
+            .show()
+    }
+
+    private fun showRenameDialog(categoria: Categoria) {
+        val dialogBinding = DialogInputTextBinding.inflate(LayoutInflater.from(this))
+        dialogBinding.tvDialogTitle.text = "Renombrar categoría"
+        dialogBinding.tilInput.hint = "Nombre"
+        dialogBinding.etInput.setText(categoria.nombre)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnCancelar.setOnClickListener { dialog.dismiss() }
+        dialogBinding.btnGuardar.setOnClickListener {
+            viewModel.renombrar(categoria.id, dialogBinding.etInput.text?.toString() ?: "")
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun confirmDelete(categoria: Categoria) {
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar categoría")
+            .setMessage(
+                "\"${categoria.nombre}\" se eliminará. Sus movimientos no se borran: " +
+                    "quedan sin categoría. Los presupuestos asociados sí se eliminan."
+            )
+            .setPositiveButton("Eliminar") { _, _ -> viewModel.eliminar(categoria.id) }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 }

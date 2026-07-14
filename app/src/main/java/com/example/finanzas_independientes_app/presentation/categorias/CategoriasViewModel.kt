@@ -77,6 +77,48 @@ class CategoriasViewModel @Inject constructor(
         }
     }
 
+    fun renombrar(id: Long, nombre: String) {
+        val nombreTrimmed = nombre.trim()
+        if (nombreTrimmed.isBlank()) {
+            _mensajeError.value = "El nombre de la categoría no puede estar vacío."
+            return
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _mensajeError.value = null
+
+            when (val result = finanzasRepository.actualizarCategoria(id, nombreTrimmed)) {
+                is ApiResult.Success -> {
+                    _createSuccess.value = "Categoría renombrada."
+                    cargar()
+                }
+                is ApiResult.Error -> {
+                    _isLoading.value = false
+                    _mensajeError.value = mapMutateError(result.error)
+                }
+            }
+        }
+    }
+
+    fun eliminar(id: Long) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _mensajeError.value = null
+
+            when (val result = finanzasRepository.eliminarCategoria(id)) {
+                is ApiResult.Success -> {
+                    _createSuccess.value = "Categoría eliminada. Sus movimientos quedan sin categoría."
+                    cargar()
+                }
+                is ApiResult.Error -> {
+                    _isLoading.value = false
+                    _mensajeError.value = mapMutateError(result.error)
+                }
+            }
+        }
+    }
+
     fun limpiarError() {
         _mensajeError.value = null
     }
@@ -101,6 +143,18 @@ class CategoriasViewModel @Inject constructor(
             ApiCode.VALIDATION_ERROR -> "Datos inválidos. Revisá los campos."
             ApiCode.UNAUTHORIZED -> "Sesión expirada. Volvé a iniciar sesión."
             else -> "Error al crear la categoría."
+        }
+        is AppError.Network -> "Sin conexión. Verificá tu internet."
+        is AppError.Unexpected -> "Error inesperado. Intentá de nuevo."
+    }
+
+    private fun mapMutateError(error: AppError): String = when (error) {
+        is AppError.Api -> when (error.code) {
+            ApiCode.ACCESO_DENEGADO -> "Las categorías del sistema no se pueden modificar."
+            ApiCode.CATEGORIA_NO_ENCONTRADA -> "La categoría ya no existe. Actualizá la lista."
+            ApiCode.VALIDATION_ERROR -> "Datos inválidos. Revisá los campos."
+            ApiCode.UNAUTHORIZED -> "Sesión expirada. Volvé a iniciar sesión."
+            else -> "No se pudo completar la operación."
         }
         is AppError.Network -> "Sin conexión. Verificá tu internet."
         is AppError.Unexpected -> "Error inesperado. Intentá de nuevo."

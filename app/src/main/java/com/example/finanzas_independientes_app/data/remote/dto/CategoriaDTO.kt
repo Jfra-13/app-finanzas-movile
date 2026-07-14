@@ -14,3 +14,8 @@ data class CategoriaRequest(
     @SerializedName("nombre") val nombre: String,
     @SerializedName("tipo") val tipo: String
 )
+
+/** Request body for PUT /categorias/{id}. Only the name is editable. */
+data class UpdateCategoriaRequest(
+    @SerializedName("nombre") val nombre: String
+)

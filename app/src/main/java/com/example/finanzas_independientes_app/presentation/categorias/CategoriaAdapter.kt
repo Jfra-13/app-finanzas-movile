@@ -11,7 +11,9 @@ import com.example.finanzas_independientes_app.R
 import com.example.finanzas_independientes_app.databinding.ItemCategoriaBinding
 import com.example.finanzas_independientes_app.domain.model.Categoria
 
-class CategoriaAdapter : ListAdapter<Categoria, CategoriaAdapter.ViewHolder>(DIFF) {
+class CategoriaAdapter(
+    private val onItemClick: (Categoria) -> Unit = {}
+) : ListAdapter<Categoria, CategoriaAdapter.ViewHolder>(DIFF) {
 
     companion object {
         private val DIFF = object : DiffUtil.ItemCallback<Categoria>() {
@@ -25,6 +27,7 @@ class CategoriaAdapter : ListAdapter<Categoria, CategoriaAdapter.ViewHolder>(DIF
 
         fun bind(item: Categoria) {
             val ctx = binding.root.context
+            binding.root.setOnClickListener { onItemClick(item) }
             binding.tvNombre.text = item.nombre
 
             // Income vs expense read at a glance: green pill vs red pill, theme-aware.
