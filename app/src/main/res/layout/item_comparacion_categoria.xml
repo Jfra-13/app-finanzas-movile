@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Per-category actual-vs-previous spend row for the comparison card. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="10dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvCompCategoria"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="Categoría"
+            android:textSize="14sp"
+            android:textColor="@color/on_surface" />
+
+        <TextView
+            android:id="@+id/tvCompAnterior"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="antes S/ 0"
+            android:textSize="12sp"
+            android:textColor="@color/text_gray" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvCompActual"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:text="S/ 0"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="@color/on_surface" />
+
+    <TextView
+        android:id="@+id/tvCompDelta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:minWidth="56dp"
+        android:gravity="end"
+        android:text="—"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_gray" />
+
+</LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.finanzas_independientes_app.presentation.analytics
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -16,12 +17,16 @@ import com.example.finanzas_independientes_app.R
 import com.example.finanzas_independientes_app.databinding.ActivityAnalyticsBinding
 import com.example.finanzas_independientes_app.databinding.BottomSheetCategoriaDetalleBinding
 import com.example.finanzas_independientes_app.databinding.LayoutBottomNavigationBinding
+import com.example.finanzas_independientes_app.presentation.categorias.CategoriasActivity
 import com.example.finanzas_independientes_app.presentation.common.AddTransactionDialog
 import com.example.finanzas_independientes_app.presentation.common.BottomNav
 import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
 import com.example.finanzas_independientes_app.presentation.transacciones.TransaccionAdapter
+import com.example.finanzas_independientes_app.domain.model.ComparacionCategorias
+import com.example.finanzas_independientes_app.domain.model.CompararCon
 import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Meta
+import com.example.finanzas_independientes_app.domain.model.SaludFinancieraItem
 import com.example.finanzas_independientes_app.domain.model.Tendencia
 import com.example.finanzas_independientes_app.domain.usecase.ProyectarTendenciaUseCase
 import com.patrykandpatrick.vico.views.cartesian.CartesianChart
@@ -60,6 +65,12 @@ class AnalyticsActivity : AppCompatActivity() {
     private val detalleAdapter = TransaccionAdapter()  // read-only: no edit/delete
     private val categoryAdapter = CategoryRankingAdapter { nombre ->
         viewModel.cargarDetalleCategoria(nombre)
+    }
+    private val comparacionAdapter = ComparacionAdapter()
+    private val saludAdapter = SaludAdapter { _ ->
+        // ponytail: opens the category screen; per-category highlight lands with the
+        // Categorías budgets slice (deep-link by categoriaId).
+        startActivity(Intent(this, CategoriasActivity::class.java))
     }
     private lateinit var stateHelper: ViewStateHelper
 
@@ -160,6 +171,16 @@ class AnalyticsActivity : AppCompatActivity() {
         binding.rvCategoryRanking.apply {
             layoutManager = LinearLayoutManager(this@AnalyticsActivity)
             adapter = categoryAdapter
+            isNestedScrollingEnabled = false
+        }
+        binding.rvComparacion.apply {
+            layoutManager = LinearLayoutManager(this@AnalyticsActivity)
+            adapter = comparacionAdapter
+            isNestedScrollingEnabled = false
+        }
+        binding.rvSalud.apply {
+            layoutManager = LinearLayoutManager(this@AnalyticsActivity)
+            adapter = saludAdapter
             isNestedScrollingEnabled = false
         }
     }
@@ -300,6 +321,17 @@ class AnalyticsActivity : AppCompatActivity() {
             if (!isChecked) return@addOnButtonCheckedListener
             viewModel.cambiarVentanaSemanas(if (checkedId == R.id.btnVentana12S) 12 else 4)
         }
+
+        // Comparison basis: previous window of the same length, or the same window
+        // last year. Check the default before wiring to avoid a spurious reload.
+        binding.toggleComparacion.check(R.id.btnCompPeriodoAnterior)
+        binding.toggleComparacion.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            viewModel.cambiarComparacion(
+                if (checkedId == R.id.btnCompAnioAnterior) CompararCon.MISMO_PERIODO_ANIO_ANTERIOR
+                else CompararCon.PERIODO_ANTERIOR
+            )
+        }
     }
 
     private fun bindFlows() {
@@ -364,6 +396,18 @@ class AnalyticsActivity : AppCompatActivity() {
                     viewModel.limpiarMensaje()
                 }
             }
+        }
+
+        lifecycleScope.launch {
+            viewModel.proyeccion.collect { renderProyeccion(it) }
+        }
+
+        lifecycleScope.launch {
+            viewModel.comparacion.collect { renderComparacion(it) }
+        }
+
+        lifecycleScope.launch {
+            viewModel.salud.collect { renderSalud(it) }
         }
     }
 
@@ -552,6 +596,66 @@ class AnalyticsActivity : AppCompatActivity() {
         }
         categoryAdapter.submitList(items)
     }
+
+    // --- P2 sections: projection, comparison, health ---
+
+    private fun renderProyeccion(state: ProyeccionState) {
+        when (state) {
+            is ProyeccionState.Idle -> binding.cardProyeccion.visibility = View.GONE
+            is ProyeccionState.SinMeta -> {
+                binding.cardProyeccion.visibility = View.VISIBLE
+                binding.groupProyeccion.visibility = View.GONE
+                binding.tvProyEmpty.visibility = View.VISIBLE
+            }
+            is ProyeccionState.Data -> {
+                val p = state.proyeccion
+                binding.cardProyeccion.visibility = View.VISIBLE
+                binding.tvProyEmpty.visibility = View.GONE
+                binding.groupProyeccion.visibility = View.VISIBLE
+                binding.tvProyUtilidad.text = money(p.utilidadProyectada)
+                binding.tvProyMeta.text = money(p.metaMensual)
+                binding.tvProyBrecha.text = money(p.brechaProyectada)
+                binding.tvProyBrecha.setTextColor(
+                    color(if (p.brechaProyectada < 0) R.color.health_danger else R.color.health_positive)
+                )
+                binding.tvProyEstado.text = if (p.enCamino) "En camino" else "Por debajo de la meta"
+                binding.tvProyEstado.setTextColor(
+                    color(if (p.enCamino) R.color.health_positive else R.color.warning)
+                )
+            }
+        }
+    }
+
+    private fun renderComparacion(data: ComparacionCategorias?) {
+        if (data == null || data.categorias.isEmpty()) {
+            binding.rvComparacion.visibility = View.GONE
+            binding.tvComparacionEmpty.visibility = View.VISIBLE
+            binding.tvComparacionPeriodos.text = "Sin datos para comparar"
+            comparacionAdapter.submitList(emptyList())
+            return
+        }
+        binding.rvComparacion.visibility = View.VISIBLE
+        binding.tvComparacionEmpty.visibility = View.GONE
+        binding.tvComparacionPeriodos.text =
+            "Actual ${data.periodoActual.desde}…${data.periodoActual.hasta} · vs " +
+            "${data.periodoAnterior.desde}…${data.periodoAnterior.hasta}"
+        comparacionAdapter.submitList(data.categorias)
+    }
+
+    private fun renderSalud(senales: List<SaludFinancieraItem>) {
+        if (senales.isEmpty()) {
+            binding.rvSalud.visibility = View.GONE
+            binding.tvSaludEmpty.visibility = View.VISIBLE
+            saludAdapter.submitList(emptyList())
+            return
+        }
+        binding.rvSalud.visibility = View.VISIBLE
+        binding.tvSaludEmpty.visibility = View.GONE
+        saludAdapter.submitList(senales)
+    }
+
+    /** Full amount with currency and cents for the detail cards. */
+    private fun money(value: Double): String = String.format(Locale.getDefault(), "S/ %,.2f", value)
 
     // --- Category drill-down bottom sheet ---
 

@@ -6,11 +6,16 @@ import com.example.finanzas_independientes_app.core.network.ApiCode
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.core.network.AppError
 import com.example.finanzas_independientes_app.domain.model.Categoria
+import com.example.finanzas_independientes_app.domain.model.ComparacionCategorias
+import com.example.finanzas_independientes_app.domain.model.CompararCon
 import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Meta
+import com.example.finanzas_independientes_app.domain.model.ProyeccionMensual
+import com.example.finanzas_independientes_app.domain.model.SaludFinancieraItem
 import com.example.finanzas_independientes_app.domain.model.Tendencia
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
+import com.example.finanzas_independientes_app.domain.usecase.OrdenarSenalesSaludUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +72,24 @@ class AnalyticsViewModel @Inject constructor(
     private val _metaActual = MutableStateFlow<Meta?>(null)
     val metaActual: StateFlow<Meta?> = _metaActual
 
+    /** Run-rate projection for the month. Distinguishes "no goal" from a real error. */
+    private val _proyeccion = MutableStateFlow<ProyeccionState>(ProyeccionState.Idle)
+    val proyeccion: StateFlow<ProyeccionState> = _proyeccion
+
+    /** Per-category spend vs the comparison window. Null until loaded / on failure. */
+    private val _comparacion = MutableStateFlow<ComparacionCategorias?>(null)
+    val comparacion: StateFlow<ComparacionCategorias?> = _comparacion
+
+    /** Comparison basis for the current-vs-previous view. */
+    private val _compararCon = MutableStateFlow(CompararCon.PERIODO_ANTERIOR)
+    val compararCon: StateFlow<CompararCon> = _compararCon
+
+    /** Health signals, already ordered most-urgent first. */
+    private val _salud = MutableStateFlow<List<SaludFinancieraItem>>(emptyList())
+    val salud: StateFlow<List<SaludFinancieraItem>> = _salud
+
+    private val ordenarSalud = OrdenarSenalesSaludUseCase()
+
     /** Category name -> id, resolved from the categories list to enable pie drill-down. */
     private var categoriasMap: Map<String, Long> = emptyMap()
 
@@ -87,6 +110,10 @@ class AnalyticsViewModel @Inject constructor(
             val deferredCategorias = async { finanzasRepository.obtenerResumenCategorias() }
             val deferredCats = async { finanzasRepository.listarCategorias() }
             val deferredMeta = async { finanzasRepository.obtenerMetaActual() }
+            val deferredProyeccion = async { finanzasRepository.obtenerProyeccionMensual() }
+            val deferredComparacion =
+                async { finanzasRepository.obtenerComparacionCategorias(compararCon = _compararCon.value) }
+            val deferredSalud = async { finanzasRepository.obtenerSaludFinanciera() }
 
             when (val r = deferredDiaSemana.await()) {
                 is ApiResult.Success -> _ingresosDiaSemana.value = r.data
@@ -120,6 +147,23 @@ class AnalyticsViewModel @Inject constructor(
                 is ApiResult.Error -> null
             }
 
+            // Secondary insights: a failure here shows an empty section, it never
+            // takes over the screen's error channel (the charts own that).
+            _proyeccion.value = when (val r = deferredProyeccion.await()) {
+                is ApiResult.Success -> ProyeccionState.Data(r.data)
+                is ApiResult.Error ->
+                    if (r.error is AppError.Api && r.error.code == ApiCode.META_NO_ENCONTRADA)
+                        ProyeccionState.SinMeta else ProyeccionState.Idle
+            }
+            _comparacion.value = when (val r = deferredComparacion.await()) {
+                is ApiResult.Success -> r.data
+                is ApiResult.Error -> null
+            }
+            _salud.value = when (val r = deferredSalud.await()) {
+                is ApiResult.Success -> ordenarSalud(r.data)
+                is ApiResult.Error -> emptyList()
+            }
+
             _isLoading.value = false
         }
     }
@@ -151,6 +195,20 @@ class AnalyticsViewModel @Inject constructor(
             when (val r = finanzasRepository.obtenerIngresosPorDiaSemana(semanas)) {
                 is ApiResult.Success -> _ingresosDiaSemana.value = r.data
                 is ApiResult.Error -> _errorMessage.value = handleError(r.error)
+            }
+        }
+    }
+
+    /** Switches the comparison basis and reloads only the comparison section. */
+    fun cambiarComparacion(base: CompararCon) {
+        if (base == _compararCon.value) return
+        _compararCon.value = base
+        viewModelScope.launch {
+            _comparacion.value = when (
+                val r = finanzasRepository.obtenerComparacionCategorias(compararCon = base)
+            ) {
+                is ApiResult.Success -> r.data
+                is ApiResult.Error -> null
             }
         }
     }
@@ -269,6 +327,13 @@ enum class Granularidad { SEMANA, MES }
  * gap between them reads as the margin.
  */
 enum class ModoAnalytics { INGRESOS, EGRESOS, JAM }
+
+/** UI state for the monthly projection card. Separates "no goal" from a load failure. */
+sealed interface ProyeccionState {
+    data object Idle : ProyeccionState
+    data object SinMeta : ProyeccionState
+    data class Data(val proyeccion: ProyeccionMensual) : ProyeccionState
+}
 
 /** UI state for the category drill-down bottom sheet. */
 sealed interface DetalleCategoriaState {
