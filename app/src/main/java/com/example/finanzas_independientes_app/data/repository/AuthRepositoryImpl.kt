@@ -8,11 +8,15 @@ import com.example.finanzas_independientes_app.data.mapper.toAuthSession
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
 import com.example.finanzas_independientes_app.data.remote.dto.ForgotPasswordRequest
 import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
+import com.example.finanzas_independientes_app.data.remote.dto.RefreshRequest
 import com.example.finanzas_independientes_app.data.remote.dto.ResetPasswordRequest
 import com.example.finanzas_independientes_app.data.remote.dto.UpdateNegocioRequest
+import com.example.finanzas_independientes_app.data.remote.dto.UpdatePerfilRequest
 import com.example.finanzas_independientes_app.data.remote.dto.UsuarioRegistroDTO
 import com.example.finanzas_independientes_app.data.remote.dto.VerifyOtpRequest
+import com.example.finanzas_independientes_app.data.mapper.toDomain
 import com.example.finanzas_independientes_app.domain.model.AuthSession
+import com.example.finanzas_independientes_app.domain.model.Perfil
 import com.example.finanzas_independientes_app.domain.repository.AuthRepository
 import com.google.gson.Gson
 import javax.inject.Inject
@@ -66,5 +70,35 @@ class AuthRepositoryImpl @Inject constructor(
             session.updateTipoNegocio(tipoNegocio)
         }
         return result
+    }
+
+    override suspend fun obtenerPerfil(): ApiResult<Perfil> {
+        val result = safeApiCall(gson) { api.obtenerPerfil() }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.toDomain(), result.code)
+            is ApiResult.Error -> result
+        }
+    }
+
+    override suspend fun actualizarPerfil(nombre: String?, telefono: String?): ApiResult<Perfil> {
+        val result = safeApiCall(gson) {
+            api.actualizarPerfil(UpdatePerfilRequest(nombre, telefono))
+        }
+        return when (result) {
+            is ApiResult.Success -> {
+                session.updateNombre(result.data.nombre)
+                ApiResult.Success(result.data.toDomain(), result.code)
+            }
+            is ApiResult.Error -> result
+        }
+    }
+
+    override suspend fun logout() {
+        val refresh = session.refreshToken
+        if (refresh != null) {
+            // Best-effort revocation; idempotent server-side, result ignored on purpose.
+            safeUnitCall(gson) { api.logout(RefreshRequest(refresh)) }
+        }
+        session.clear()
     }
 }

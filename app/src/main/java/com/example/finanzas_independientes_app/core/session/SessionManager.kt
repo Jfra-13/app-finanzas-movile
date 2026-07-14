@@ -39,6 +39,10 @@ class SessionManager(private val storage: SecureStorage) {
         storage.putString(KEY_TIPO_NEGOCIO, tipoNegocio)
     }
 
+    fun updateNombre(nombre: String) {
+        storage.putString(KEY_NOMBRE, nombre)
+    }
+
     fun clear() = storage.clear()
 
     private companion object {

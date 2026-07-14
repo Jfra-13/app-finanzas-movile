@@ -2,6 +2,7 @@ package com.example.finanzas_independientes_app.domain.repository
 
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.domain.model.AuthSession
+import com.example.finanzas_independientes_app.domain.model.Perfil
 
 /**
  * Contract for all authentication-related network operations.
@@ -31,4 +32,17 @@ interface AuthRepository {
 
     /** Update the authenticated user's business type and persist it in the session. */
     suspend fun actualizarNegocio(tipoNegocio: String): ApiResult<Unit>
+
+    /** Fetch the authenticated user's full profile from the server. */
+    suspend fun obtenerPerfil(): ApiResult<Perfil>
+
+    /** Partial profile update: only non-null fields change. Email is not editable. */
+    suspend fun actualizarPerfil(nombre: String? = null, telefono: String? = null): ApiResult<Perfil>
+
+    /**
+     * Ends the session: best-effort server-side refresh-token revocation, then
+     * always clears the local session — a network failure must never keep the
+     * user logged in on the device.
+     */
+    suspend fun logout()
 }

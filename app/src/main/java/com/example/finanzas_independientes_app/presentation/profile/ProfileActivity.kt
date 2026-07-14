@@ -32,6 +32,9 @@ class ProfileActivity : AppCompatActivity() {
     private val quickAdd: QuickAddViewModel by lazy {
         ViewModelProvider(this)[QuickAddViewModel::class.java]
     }
+    private val profileViewModel: ProfileViewModel by lazy {
+        ViewModelProvider(this)[ProfileViewModel::class.java]
+    }
 
     @Inject
     lateinit var session: SessionManager
@@ -67,9 +70,19 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    // Session values render instantly; the server profile refreshes them when it arrives.
     private fun bindHeader() {
         binding.tvProfileName.text = session.nombre ?: "Usuario"
         binding.tvProfileEmail.text = session.email ?: ""
+
+        lifecycleScope.launch {
+            profileViewModel.perfil.collect { perfil ->
+                if (perfil != null) {
+                    binding.tvProfileName.text = perfil.nombre
+                    binding.tvProfileEmail.text = perfil.email
+                }
+            }
+        }
     }
 
     private fun bindRows() {

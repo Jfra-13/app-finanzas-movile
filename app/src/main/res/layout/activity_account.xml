@@ -88,6 +88,10 @@
                     layout="@layout/view_setting_row" />
 
                 <include
+                    android:id="@+id/rowNombre"
+                    layout="@layout/view_setting_row" />
+
+                <include
                     android:id="@+id/rowTelefono"
                     layout="@layout/view_setting_row" />
 
