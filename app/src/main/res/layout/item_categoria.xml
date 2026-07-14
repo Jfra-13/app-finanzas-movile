@@ -38,9 +38,37 @@
             android:paddingVertical="5dp"
             android:textSize="12sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/tvNombre"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/tvNombre" />
+
+        <!-- Budget consumption (expense categories with a cap). Shown by the adapter. -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/barPresupuesto"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:max="100"
+            android:visibility="gone"
+            app:indicatorColor="@color/health_info"
+            app:trackColor="@color/outline_variant"
+            app:trackCornerRadius="4dp"
+            app:trackThickness="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvNombre" />
+
+        <TextView
+            android:id="@+id/tvPresupuesto"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="12sp"
+            android:textColor="@color/text_gray"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barPresupuesto" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

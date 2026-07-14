@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.finanzas_independientes_app.core.network.ApiCode
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.core.network.AppError
-import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,8 +18,8 @@ class CategoriasViewModel @Inject constructor(
     private val finanzasRepository: FinanzasRepository
 ) : ViewModel() {
 
-    private val _categorias = MutableStateFlow<List<Categoria>>(emptyList())
-    val categorias: StateFlow<List<Categoria>> = _categorias
+    private val _categorias = MutableStateFlow<List<CategoriaConPresupuesto>>(emptyList())
+    val categorias: StateFlow<List<CategoriaConPresupuesto>> = _categorias
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -40,13 +40,21 @@ class CategoriasViewModel @Inject constructor(
             _isLoading.value = true
             _mensajeError.value = null
 
-            when (val result = finanzasRepository.listarCategorias()) {
+            val deferredCategorias = async { finanzasRepository.listarCategorias() }
+            val deferredPresupuestos = async { finanzasRepository.obtenerPresupuestos() }
+
+            when (val result = deferredCategorias.await()) {
                 is ApiResult.Success -> {
-                    _categorias.value = result.data
+                    // Budgets are secondary: a failure here just shows categories without caps.
+                    val presupuestos = when (val p = deferredPresupuestos.await()) {
+                        is ApiResult.Success -> p.data.associateBy { it.categoriaId }
+                        is ApiResult.Error -> emptyMap()
+                    }
+                    _categorias.value = result.data.map {
+                        CategoriaConPresupuesto(it, presupuestos[it.id])
+                    }
                 }
-                is ApiResult.Error -> {
-                    _mensajeError.value = mapError(result.error)
-                }
+                is ApiResult.Error -> _mensajeError.value = mapError(result.error)
             }
 
             _isLoading.value = false
@@ -119,6 +127,49 @@ class CategoriasViewModel @Inject constructor(
         }
     }
 
+    /** Upsert the monthly cap for a category. Amount must be at least 0.01. */
+    fun fijarTope(categoriaId: Long, montoTexto: String) {
+        val monto = montoTexto.trim().replace(",", ".").toDoubleOrNull()
+        if (monto == null || monto < 0.01) {
+            _mensajeError.value = "Ingresá un monto válido (mayor a 0)."
+            return
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _mensajeError.value = null
+
+            when (val result = finanzasRepository.guardarPresupuesto(categoriaId, monto)) {
+                is ApiResult.Success -> {
+                    _createSuccess.value = "Tope guardado."
+                    cargar()
+                }
+                is ApiResult.Error -> {
+                    _isLoading.value = false
+                    _mensajeError.value = mapMutateError(result.error)
+                }
+            }
+        }
+    }
+
+    fun quitarTope(presupuestoId: Long) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _mensajeError.value = null
+
+            when (val result = finanzasRepository.eliminarPresupuesto(presupuestoId)) {
+                is ApiResult.Success -> {
+                    _createSuccess.value = "Tope eliminado."
+                    cargar()
+                }
+                is ApiResult.Error -> {
+                    _isLoading.value = false
+                    _mensajeError.value = mapMutateError(result.error)
+                }
+            }
+        }
+    }
+
     fun limpiarError() {
         _mensajeError.value = null
     }
@@ -152,6 +203,7 @@ class CategoriasViewModel @Inject constructor(
         is AppError.Api -> when (error.code) {
             ApiCode.ACCESO_DENEGADO -> "Las categorías del sistema no se pueden modificar."
             ApiCode.CATEGORIA_NO_ENCONTRADA -> "La categoría ya no existe. Actualizá la lista."
+            ApiCode.PRESUPUESTO_NO_ENCONTRADO -> "El presupuesto ya no existe. Actualizá la lista."
             ApiCode.VALIDATION_ERROR -> "Datos inválidos. Revisá los campos."
             ApiCode.UNAUTHORIZED -> "Sesión expirada. Volvé a iniciar sesión."
             else -> "No se pudo completar la operación."

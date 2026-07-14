@@ -1,6 +1,7 @@
 package com.example.finanzas_independientes_app.presentation.categorias
 
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
@@ -17,6 +18,7 @@ import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @AndroidEntryPoint
 class CategoriasActivity : AppCompatActivity() {
@@ -47,7 +49,7 @@ class CategoriasActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = CategoriaAdapter { categoria -> showOptionsDialog(categoria) }
+        adapter = CategoriaAdapter { row -> showOptionsDialog(row) }
         binding.rvCategorias.layoutManager = LinearLayoutManager(this)
         binding.rvCategorias.adapter = adapter
     }
@@ -134,13 +136,27 @@ class CategoriasActivity : AppCompatActivity() {
 
     // System categories also open this dialog; the backend answers 403 and the
     // ViewModel surfaces a clear message (the DTO carries no "system" flag yet).
-    private fun showOptionsDialog(categoria: Categoria) {
+    // Budget actions are offered only on expense categories — a cap is a spending limit.
+    private fun showOptionsDialog(row: CategoriaConPresupuesto) {
+        val categoria = row.categoria
+        val esEgreso = categoria.tipo == "EGRESO"
+        val tieneTope = row.presupuesto != null
+
+        val acciones = buildList {
+            add("Renombrar")
+            if (esEgreso) add(if (tieneTope) "Editar tope" else "Fijar tope")
+            if (esEgreso && tieneTope) add("Quitar tope")
+            add("Eliminar")
+        }
+
         AlertDialog.Builder(this)
             .setTitle(categoria.nombre)
-            .setItems(arrayOf("Renombrar", "Eliminar")) { _, which ->
-                when (which) {
-                    0 -> showRenameDialog(categoria)
-                    1 -> confirmDelete(categoria)
+            .setItems(acciones.toTypedArray()) { _, which ->
+                when (acciones[which]) {
+                    "Renombrar" -> showRenameDialog(categoria)
+                    "Fijar tope", "Editar tope" -> showBudgetDialog(row)
+                    "Quitar tope" -> confirmQuitarTope(row)
+                    "Eliminar" -> confirmDelete(categoria)
                 }
             }
             .show()
@@ -162,6 +178,42 @@ class CategoriasActivity : AppCompatActivity() {
             dialog.dismiss()
         }
         dialog.show()
+    }
+
+    // --- Budget (tope) ---
+
+    // Reuses the generic input dialog with a numeric keypad; prefilled when editing.
+    private fun showBudgetDialog(row: CategoriaConPresupuesto) {
+        val actual = row.presupuesto
+        val dialogBinding = DialogInputTextBinding.inflate(LayoutInflater.from(this))
+        dialogBinding.tvDialogTitle.text = if (actual != null) "Editar tope" else "Fijar tope"
+        dialogBinding.tilInput.hint = "Monto mensual (S/)"
+        dialogBinding.etInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        if (actual != null) {
+            dialogBinding.etInput.setText(String.format(Locale.getDefault(), "%.2f", actual.montoMensual))
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogBinding.root)
+            .create()
+
+        dialogBinding.btnCancelar.setOnClickListener { dialog.dismiss() }
+        dialogBinding.btnGuardar.setOnClickListener {
+            viewModel.fijarTope(row.categoria.id, dialogBinding.etInput.text?.toString() ?: "")
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun confirmQuitarTope(row: CategoriaConPresupuesto) {
+        val presupuesto = row.presupuesto ?: return
+        AlertDialog.Builder(this)
+            .setTitle("Quitar tope")
+            .setMessage("Se eliminará el tope de \"${row.categoria.nombre}\".")
+            .setPositiveButton("Quitar") { _, _ -> viewModel.quitarTope(presupuesto.id) }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     private fun confirmDelete(categoria: Categoria) {
