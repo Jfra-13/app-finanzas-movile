@@ -24,6 +24,7 @@ import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Presupuesto
 import com.example.finanzas_independientes_app.domain.model.ProyeccionMensual
 import com.example.finanzas_independientes_app.domain.model.Meta
+import com.example.finanzas_independientes_app.domain.model.MetaHistorialItem
 import com.example.finanzas_independientes_app.domain.model.PaginatedTransacciones
 import com.example.finanzas_independientes_app.domain.model.ProgresoMetas
 import com.example.finanzas_independientes_app.domain.model.ResumenDiarioDia
@@ -59,15 +60,17 @@ class FinanzasRepositoryImpl @Inject constructor(
     override suspend fun listarTransacciones(
         tipo: String?,
         categoriaId: Long?,
+        sinCategoria: Boolean?,
         desde: String?,
         hasta: String?,
         page: Int,
         size: Int,
         sort: String?
     ): ApiResult<PaginatedTransacciones> {
-        val sinFiltros = tipo == null && categoriaId == null && desde == null && hasta == null
+        val sinFiltros = tipo == null && categoriaId == null && sinCategoria != true &&
+            desde == null && hasta == null
         val result = safeApiCall(gson) {
-            api.listarTransacciones(tipo, categoriaId, desde, hasta, page, size, sort)
+            api.listarTransacciones(tipo, categoriaId, sinCategoria, desde, hasta, page, size, sort)
         }
         return when (result) {
             is ApiResult.Success -> {
@@ -184,6 +187,14 @@ class FinanzasRepositoryImpl @Inject constructor(
                     result
                 }
             }
+        }
+    }
+
+    override suspend fun obtenerHistorialMetas(meses: Int?): ApiResult<List<MetaHistorialItem>> {
+        val result = safeApiCall(gson) { api.obtenerHistorialMetas(meses) }
+        return when (result) {
+            is ApiResult.Success -> ApiResult.Success(result.data.map { it.toDomain() }, result.code)
+            is ApiResult.Error -> result
         }
     }
 

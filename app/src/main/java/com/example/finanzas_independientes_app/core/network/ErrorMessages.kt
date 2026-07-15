@@ -12,6 +12,7 @@ fun AppError.toUserMessage(): String = when (this) {
         ApiCode.VALIDATION_ERROR ->
             fieldErrors.firstOrNull()?.message ?: "Revisá los datos ingresados."
         ApiCode.UNAUTHORIZED -> "Correo o contraseña incorrectos."
+        ApiCode.CREDENCIALES_INVALIDAS -> "Contraseña incorrecta."
         ApiCode.REFRESH_TOKEN_INVALIDO -> "Tu sesión expiró. Iniciá sesión de nuevo."
         ApiCode.EMAIL_DUPLICADO -> "Ese correo ya está registrado."
         ApiCode.OTP_INVALIDO -> "El código ingresado no es válido."

@@ -232,8 +232,9 @@ class AnalyticsViewModel @Inject constructor(
 
     /**
      * Loads the expense transactions behind a pie slice.
-     * For a real category we filter server-side by id; for the "Sin categoría"
-     * bucket the API has no such filter, so we pull expenses and filter client-side.
+     * A real category filters server-side by id; the "Sin categoría" bucket uses
+     * the server's `sinCategoria=true` filter. The two are mutually exclusive, so
+     * the branch guarantees they are never sent together (400 PARAMETRO_INVALIDO).
      */
     fun cargarDetalleCategoria(nombre: String) {
         val categoriaId = categoriasMap[nombre]
@@ -242,19 +243,15 @@ class AnalyticsViewModel @Inject constructor(
             val result = if (categoriaId != null) {
                 finanzasRepository.listarTransacciones(categoriaId = categoriaId, size = DETALLE_PAGE_SIZE)
             } else {
-                // ponytail: "Sin categoría" filtered client-side on the first page; the API
-                // can't filter uncategorized. Add a server filter if this needs full paging.
-                finanzasRepository.listarTransacciones(tipo = "EGRESO", size = DETALLE_PAGE_SIZE)
+                finanzasRepository.listarTransacciones(
+                    tipo = "EGRESO",
+                    sinCategoria = true,
+                    size = DETALLE_PAGE_SIZE
+                )
             }
             when (result) {
-                is ApiResult.Success -> {
-                    val items = if (categoriaId != null) {
-                        result.data.content
-                    } else {
-                        result.data.content.filter { it.categoriaId == null }
-                    }
-                    _detalleCategoria.value = DetalleCategoriaState.Success(nombre, items)
-                }
+                is ApiResult.Success ->
+                    _detalleCategoria.value = DetalleCategoriaState.Success(nombre, result.data.content)
                 is ApiResult.Error ->
                     _detalleCategoria.value = DetalleCategoriaState.Error(nombre, handleError(result.error))
             }

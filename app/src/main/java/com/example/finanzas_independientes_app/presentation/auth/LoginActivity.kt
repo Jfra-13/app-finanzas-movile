@@ -3,6 +3,7 @@ package com.example.finanzas_independientes_app.presentation.auth
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -53,15 +54,37 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.loginExitoso.collect { usuarioId ->
                 if (usuarioId != null) {
-                    val intent = if (sessionManager.tipoNegocio != null) {
-                        Intent(this@LoginActivity, DashboardActivity::class.java)
+                    if (viewModel.cuentaReactivada.value) {
+                        showReactivadaDialog()
                     } else {
-                        Intent(this@LoginActivity, SelectBusinessActivity::class.java)
+                        goToNextScreen()
                     }
-                    startActivity(intent)
-                    finish()
                 }
             }
         }
+    }
+
+    // Login within the 30-day grace window reactivated a deleted account; tell the
+    // user before continuing. Re-deleting, if they still want it, lives in Account.
+    private fun showReactivadaDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Cuenta reactivada")
+            .setMessage(
+                "Tu cuenta estaba pendiente de eliminación y quedó reactivada con " +
+                    "todos tus datos."
+            )
+            .setCancelable(false)
+            .setPositiveButton("Entendido") { _, _ -> goToNextScreen() }
+            .show()
+    }
+
+    private fun goToNextScreen() {
+        val intent = if (sessionManager.tipoNegocio != null) {
+            Intent(this, DashboardActivity::class.java)
+        } else {
+            Intent(this, SelectBusinessActivity::class.java)
+        }
+        startActivity(intent)
+        finish()
     }
 }

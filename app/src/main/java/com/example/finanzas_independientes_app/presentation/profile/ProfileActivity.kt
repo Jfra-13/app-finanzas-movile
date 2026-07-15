@@ -17,6 +17,7 @@ import com.example.finanzas_independientes_app.presentation.categorias.Categoria
 import com.example.finanzas_independientes_app.presentation.common.AddTransactionDialog
 import com.example.finanzas_independientes_app.presentation.common.BottomNav
 import com.example.finanzas_independientes_app.presentation.common.QuickAddViewModel
+import com.example.finanzas_independientes_app.presentation.metas.MetaHistorialActivity
 import com.example.finanzas_independientes_app.presentation.transacciones.TransaccionesActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -95,6 +96,9 @@ class ProfileActivity : AppCompatActivity() {
         }
         configureRow(binding.rowMovimientos, "📋", "Movimientos") {
             startActivity(Intent(this, TransaccionesActivity::class.java))
+        }
+        configureRow(binding.rowHistorialMetas, "🎯", "Historial de metas") {
+            startActivity(Intent(this, MetaHistorialActivity::class.java))
         }
         configureRow(binding.rowApariencia, "🎨", "Apariencia") { soon() }
         configureRow(binding.rowNotificaciones, "🔔", "Notificaciones") { soon() }

@@ -16,7 +16,8 @@ fun AuthData.toUsuario(): Usuario = Usuario(
 fun AuthData.toAuthSession(): AuthSession = AuthSession(
     token = token,
     refreshToken = refreshToken,
-    usuario = toUsuario()
+    usuario = toUsuario(),
+    cuentaReactivada = cuentaReactivada
 )
 
 fun PerfilDTO.toDomain(): Perfil = Perfil(

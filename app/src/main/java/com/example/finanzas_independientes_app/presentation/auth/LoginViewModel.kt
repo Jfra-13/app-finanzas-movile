@@ -24,6 +24,10 @@ class LoginViewModel @Inject constructor(
     private val _loginExitoso = MutableStateFlow<Long?>(null)
     val loginExitoso: StateFlow<Long?> = _loginExitoso
 
+    // True when the successful login also reactivated an account pending deletion.
+    private val _cuentaReactivada = MutableStateFlow(false)
+    val cuentaReactivada: StateFlow<Boolean> = _cuentaReactivada
+
     fun iniciarSesion(email: String, pass: String) {
         if (email.isBlank() || pass.isBlank()) {
             _mensajeUI.value = "Ingresa tu correo y contraseña"
@@ -32,7 +36,10 @@ class LoginViewModel @Inject constructor(
 
         viewModelScope.launch {
             when (val result = authRepository.login(email, pass)) {
-                is ApiResult.Success -> _loginExitoso.value = result.data.usuario.usuarioId
+                is ApiResult.Success -> {
+                    _cuentaReactivada.value = result.data.cuentaReactivada
+                    _loginExitoso.value = result.data.usuario.usuarioId
+                }
                 is ApiResult.Error -> _mensajeUI.value = result.error.toUserMessage()
             }
         }

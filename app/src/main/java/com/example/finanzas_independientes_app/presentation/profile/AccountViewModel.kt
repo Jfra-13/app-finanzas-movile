@@ -30,6 +30,10 @@ class AccountViewModel @Inject constructor(
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje
 
+    /** Inline error for the delete-account password field; null = no error. */
+    private val _deleteAccountError = MutableStateFlow<String?>(null)
+    val deleteAccountError: StateFlow<String?> = _deleteAccountError
+
     init {
         cargarPerfil()
     }
@@ -85,8 +89,40 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Soft-deletes the account after confirming [password]. Wrong password shows
+     * an inline field error (never logs the user out); success reuses the logout
+     * navigation, since the local session is already cleared server-side.
+     */
+    fun eliminarCuenta(password: String) {
+        if (password.isBlank()) {
+            _deleteAccountError.value = "Ingresá tu contraseña."
+            return
+        }
+        viewModelScope.launch {
+            when (val result = authRepository.eliminarCuenta(password)) {
+                is ApiResult.Success -> _logoutDone.value = true
+                is ApiResult.Error -> _deleteAccountError.value = mapDeleteError(result.error)
+            }
+        }
+    }
+
     fun limpiarMensaje() {
         _mensaje.value = null
+    }
+
+    fun limpiarDeleteError() {
+        _deleteAccountError.value = null
+    }
+
+    private fun mapDeleteError(error: AppError): String = when (error) {
+        is AppError.Api -> when (error.code) {
+            ApiCode.CREDENCIALES_INVALIDAS -> "Contraseña incorrecta."
+            ApiCode.VALIDATION_ERROR ->
+                error.fieldErrors.firstOrNull()?.message ?: "Ingresá tu contraseña."
+            else -> error.toUserMessage()
+        }
+        else -> error.toUserMessage()
     }
 
     private fun mapUpdateError(error: AppError): String = when (error) {

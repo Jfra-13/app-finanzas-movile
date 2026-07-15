@@ -8,6 +8,7 @@ import com.example.finanzas_independientes_app.domain.model.IngresoDiaSemana
 import com.example.finanzas_independientes_app.domain.model.Presupuesto
 import com.example.finanzas_independientes_app.domain.model.ProyeccionMensual
 import com.example.finanzas_independientes_app.domain.model.Meta
+import com.example.finanzas_independientes_app.domain.model.MetaHistorialItem
 import com.example.finanzas_independientes_app.domain.model.PaginatedTransacciones
 import com.example.finanzas_independientes_app.domain.model.ProgresoMetas
 import com.example.finanzas_independientes_app.domain.model.ResumenDiarioDia
@@ -31,9 +32,11 @@ interface FinanzasRepository {
         categoriaId: Long? = null
     ): ApiResult<Unit>
 
+    /** `sinCategoria=true` filters to uncategorized transactions; not combinable with `categoriaId`. */
     suspend fun listarTransacciones(
         tipo: String? = null,
         categoriaId: Long? = null,
+        sinCategoria: Boolean? = null,
         desde: String? = null,
         hasta: String? = null,
         page: Int = 0,
@@ -74,6 +77,9 @@ interface FinanzasRepository {
     suspend fun fijarMeta(montoObjetivo: Double, diasLaborables: List<Int>): ApiResult<Meta>
 
     suspend fun obtenerMetaActual(): ApiResult<Meta>
+
+    /** Past goal periods, most recent first. `meses` = how many back (null = server default of 6). */
+    suspend fun obtenerHistorialMetas(meses: Int? = null): ApiResult<List<MetaHistorialItem>>
 
     // --- Categories ---
 

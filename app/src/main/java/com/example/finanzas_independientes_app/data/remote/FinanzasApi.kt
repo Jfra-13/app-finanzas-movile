@@ -4,10 +4,12 @@ import com.example.finanzas_independientes_app.core.network.ApiResponse
 import com.example.finanzas_independientes_app.data.remote.dto.AuthData
 import com.example.finanzas_independientes_app.data.remote.dto.CategoriaDTO
 import com.example.finanzas_independientes_app.data.remote.dto.CategoriaRequest
+import com.example.finanzas_independientes_app.data.remote.dto.DeleteAccountRequest
 import com.example.finanzas_independientes_app.data.remote.dto.ForgotPasswordRequest
 import com.example.finanzas_independientes_app.data.remote.dto.IngresoDiaSemanaItemDTO
 import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
 import com.example.finanzas_independientes_app.data.remote.dto.MetaDTO
+import com.example.finanzas_independientes_app.data.remote.dto.MetaHistorialItemDTO
 import com.example.finanzas_independientes_app.data.remote.dto.MetaRequest
 import com.example.finanzas_independientes_app.data.remote.dto.PaginatedTransaccionDTO
 import com.example.finanzas_independientes_app.data.remote.dto.ComparacionCategoriasDTO
@@ -88,6 +90,16 @@ interface FinanzasApi {
     @PUT("api/v1/usuarios/me/negocio")
     suspend fun actualizarNegocio(@Body body: UpdateNegocioRequest): Response<ApiResponse<Unit>>
 
+    /**
+     * Soft-deletes the account with a 30-day grace window. The password in the
+     * body re-confirms identity. 200 ACCOUNT_DELETED on success (server revokes
+     * all tokens and rejects the access token immediately); 401
+     * CREDENCIALES_INVALIDAS on a wrong password; VALIDATION_ERROR if absent.
+     * Logging in within the grace window reactivates the account.
+     */
+    @POST("api/v1/usuarios/me/eliminar")
+    suspend fun eliminarCuenta(@Body body: DeleteAccountRequest): Response<ApiResponse<Unit>>
+
     // -------------------------------------------------------------------------
     // Protected — transactions
     // -------------------------------------------------------------------------
@@ -95,11 +107,16 @@ interface FinanzasApi {
     @POST("api/v1/finanzas/transacciones")
     suspend fun registrarTransaccion(@Body body: TransaccionRegistroDTO): Response<ApiResponse<Unit>>
 
-    /** Optional `desde`/`hasta` (YYYY-MM-DD, inclusive) filter by date range. */
+    /**
+     * Optional `desde`/`hasta` (YYYY-MM-DD, inclusive) filter by date range.
+     * `sinCategoria=true` returns only uncategorized transactions; it is mutually
+     * exclusive with `categoriaId` (sending both yields 400 PARAMETRO_INVALIDO).
+     */
     @GET("api/v1/finanzas/transacciones")
     suspend fun listarTransacciones(
         @Query("tipo") tipo: String? = null,
         @Query("categoriaId") categoriaId: Long? = null,
+        @Query("sinCategoria") sinCategoria: Boolean? = null,
         @Query("desde") desde: String? = null,
         @Query("hasta") hasta: String? = null,
         @Query("page") page: Int = 0,
@@ -160,6 +177,15 @@ interface FinanzasApi {
 
     @GET("api/v1/finanzas/metas/actual")
     suspend fun obtenerMetaActual(): Response<ApiResponse<MetaDTO>>
+
+    /**
+     * Past goal periods, most recent window first. `meses` = how many periods
+     * back (server default 6). Response code GOALS_HISTORY_OK.
+     */
+    @GET("api/v1/finanzas/metas/historial")
+    suspend fun obtenerHistorialMetas(
+        @Query("meses") meses: Int? = null
+    ): Response<ApiResponse<List<MetaHistorialItemDTO>>>
 
     // -------------------------------------------------------------------------
     // Protected — categories

@@ -45,4 +45,11 @@ interface AuthRepository {
      * user logged in on the device.
      */
     suspend fun logout()
+
+    /**
+     * Soft-deletes the account (30-day grace) after re-confirming [password].
+     * On success clears the local session — the server has already revoked every
+     * token — so the caller can route straight to Login.
+     */
+    suspend fun eliminarCuenta(password: String): ApiResult<Unit>
 }

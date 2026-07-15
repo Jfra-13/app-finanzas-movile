@@ -71,6 +71,10 @@
                 layout="@layout/view_setting_row" />
 
             <include
+                android:id="@+id/rowHistorialMetas"
+                layout="@layout/view_setting_row" />
+
+            <include
                 android:id="@+id/rowApariencia"
                 layout="@layout/view_setting_row" />
 

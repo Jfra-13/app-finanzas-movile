@@ -12,18 +12,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.finanzas_independientes_app.core.session.SessionManager
 import com.example.finanzas_independientes_app.databinding.ActivityAccountBinding
+import com.example.finanzas_independientes_app.databinding.DialogDeleteAccountBinding
 import com.example.finanzas_independientes_app.databinding.DialogInputTextBinding
 import com.example.finanzas_independientes_app.databinding.ViewSettingRowBinding
+import com.google.android.material.textfield.TextInputLayout
 import com.example.finanzas_independientes_app.presentation.auth.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Account settings. Only what the backend actually supports is wired: viewing the
- * email, changing the phone number (PUT /usuarios/me) and logging out with
- * server-side refresh-token revocation. Reset-stats and delete-account have no
- * endpoint yet, so they announce themselves as upcoming rather than pretending to work.
+ * Account settings. Wires what the backend supports: viewing the email, changing
+ * the phone number (PUT /usuarios/me), deleting the account (soft-delete with a
+ * 30-day grace) and logging out with server-side refresh-token revocation.
+ * Reset-stats has no endpoint yet, so it announces itself as upcoming.
  */
 @AndroidEntryPoint
 class AccountActivity : AppCompatActivity() {
@@ -32,6 +34,9 @@ class AccountActivity : AppCompatActivity() {
     private val viewModel: AccountViewModel by lazy {
         ViewModelProvider(this)[AccountViewModel::class.java]
     }
+
+    // Set while the delete dialog is open so inline errors land on its field.
+    private var deletePasswordTil: TextInputLayout? = null
 
     @Inject
     lateinit var session: SessionManager
@@ -47,7 +52,7 @@ class AccountActivity : AppCompatActivity() {
         configureRow(binding.rowNombre, "👤", "Cambiar nombre") { showNameDialog() }
         configureRow(binding.rowTelefono, "📱", "Cambiar número de teléfono") { showPhoneDialog() }
         configureRow(binding.rowReset, "🔄", "Resetear estadísticas mensuales") { soon() }
-        configureRow(binding.rowEliminar, "🗑️", "Eliminar cuenta") { soon() }
+        configureRow(binding.rowEliminar, "🗑️", "Eliminar cuenta") { showDeleteAccountDialog() }
         configureRow(binding.rowLogout, "🚪", "Cerrar sesión") { confirmLogout() }
 
         bindFlows()
@@ -66,6 +71,46 @@ class AccountActivity : AppCompatActivity() {
                     viewModel.limpiarMensaje()
                 }
             }
+        }
+        lifecycleScope.launch {
+            viewModel.deleteAccountError.collect { error ->
+                if (error != null) {
+                    val til = deletePasswordTil
+                    if (til != null) {
+                        til.error = error
+                    } else {
+                        Toast.makeText(this@AccountActivity, error, Toast.LENGTH_SHORT).show()
+                    }
+                    viewModel.limpiarDeleteError()
+                }
+            }
+        }
+    }
+
+    // Danger zone: soft-delete with a 30-day grace, gated by the account password.
+    // Wrong password shows an inline error; the dialog stays open until success or cancel.
+    private fun showDeleteAccountDialog() {
+        val dialogBinding = DialogDeleteAccountBinding.inflate(LayoutInflater.from(this))
+        deletePasswordTil = dialogBinding.tilPassword
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Eliminar cuenta")
+            .setMessage(
+                "Tu cuenta se eliminará en 30 días. Iniciá sesión antes de ese plazo " +
+                    "para recuperarla con todos tus datos.\n\nConfirmá con tu contraseña."
+            )
+            .setView(dialogBinding.root)
+            .setPositiveButton("Eliminar", null)
+            .setNegativeButton("Cancelar", null)
+            .create()
+
+        dialog.setOnDismissListener { deletePasswordTil = null }
+        dialog.show()
+
+        // Override after show() so a wrong password does not auto-dismiss the dialog.
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            dialogBinding.tilPassword.error = null
+            viewModel.eliminarCuenta(dialogBinding.etPassword.text?.toString() ?: "")
         }
     }
 

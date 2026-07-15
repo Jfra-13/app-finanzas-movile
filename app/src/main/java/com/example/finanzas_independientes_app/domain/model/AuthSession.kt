@@ -4,5 +4,7 @@ package com.example.finanzas_independientes_app.domain.model
 data class AuthSession(
     val token: String,
     val refreshToken: String,
-    val usuario: Usuario
+    val usuario: Usuario,
+    /** True only when this login reactivated an account that was pending deletion. */
+    val cuentaReactivada: Boolean = false
 )

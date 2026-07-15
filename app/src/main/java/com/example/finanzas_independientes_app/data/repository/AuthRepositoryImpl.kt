@@ -6,6 +6,7 @@ import com.example.finanzas_independientes_app.core.network.safeUnitCall
 import com.example.finanzas_independientes_app.core.session.SessionManager
 import com.example.finanzas_independientes_app.data.mapper.toAuthSession
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
+import com.example.finanzas_independientes_app.data.remote.dto.DeleteAccountRequest
 import com.example.finanzas_independientes_app.data.remote.dto.ForgotPasswordRequest
 import com.example.finanzas_independientes_app.data.remote.dto.LoginDTO
 import com.example.finanzas_independientes_app.data.remote.dto.RefreshRequest
@@ -100,5 +101,14 @@ class AuthRepositoryImpl @Inject constructor(
             safeUnitCall(gson) { api.logout(RefreshRequest(refresh)) }
         }
         session.clear()
+    }
+
+    override suspend fun eliminarCuenta(password: String): ApiResult<Unit> {
+        val result = safeUnitCall(gson) { api.eliminarCuenta(DeleteAccountRequest(password)) }
+        if (result is ApiResult.Success) {
+            // Server already revoked every token; drop the local session too.
+            session.clear()
+        }
+        return result
     }
 }

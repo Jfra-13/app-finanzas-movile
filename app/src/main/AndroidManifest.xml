@@ -44,6 +44,7 @@
         <activity android:name=".presentation.analytics.AnalyticsActivity" android:exported="false" />
         <activity android:name=".presentation.profile.ProfileActivity" android:exported="false" />
         <activity android:name=".presentation.profile.AccountActivity" android:exported="false" />
+        <activity android:name=".presentation.metas.MetaHistorialActivity" android:exported="false" />
         <activity android:name=".presentation.calendar.CalendarActivity" android:exported="false" />
 
     </application>
