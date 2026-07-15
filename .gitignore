@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Ad-hoc error/log dumps (not source)
+Error_*.txt
+
+# Local-only (not published to GitHub)
+/CLAUDE.md
+/docs/

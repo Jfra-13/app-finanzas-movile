@@ -12,7 +12,7 @@
         android:layout_width="267dp"
         android:layout_height="265dp"
         android:contentDescription="Ilustración de gráficos o billetera"
-        android:src="@drawable/one_boarding_two"
+        android:src="@drawable/onboarding_two"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.215"

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Reusable state overlay. Include inside a ConstraintLayout/FrameLayout
+  and use ViewStateHelper to switch between states.
+
+  States: LOADING | EMPTY | ERROR | CONTENT (all gone, caller manages content visibility)
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/viewStateContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:visibility="gone">
+
+    <!-- Loading -->
+    <ProgressBar
+        android:id="@+id/stateProgressBar"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:visibility="gone"
+        android:indeterminateTint="@color/blue_primary" />
+
+    <!-- Empty icon placeholder (simple text icon) -->
+    <TextView
+        android:id="@+id/stateEmptyIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📂"
+        android:textSize="48sp"
+        android:visibility="gone" />
+
+    <!-- Empty / Error message -->
+    <TextView
+        android:id="@+id/stateMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:textColor="@color/text_gray"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <!-- Retry button (error state only) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/stateRetryButton"
+        style="@style/Widget.App.Button.Outlined"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Reintentar"
+        android:visibility="gone" />
+
+</LinearLayout>

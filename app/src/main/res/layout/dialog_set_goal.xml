@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fijar meta mensual"
+        android:textColor="@color/blue_dark"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Define tu objetivo de ingresos para este mes."
+        android:textColor="@color/text_gray"
+        android:textSize="13sp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Objetivo -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilMontoMeta"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Monto objetivo (S/)"
+        app:boxStrokeColor="@color/blue_dark"
+        app:hintTextColor="@color/blue_dark"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etMontoMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Working days -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Días laborables"
+        android:textColor="@color/blue_dark"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="7"
+        android:layout_marginBottom="20dp">
+
+        <CheckBox
+            android:id="@+id/cbLunes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:button="@null"
+            android:background="@drawable/selector_day_chip"
+            android:checked="true"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="L"
+            android:textColor="@color/selector_day_chip_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/cbMartes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:button="@null"
+            android:background="@drawable/selector_day_chip"
+            android:checked="true"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="M"
+            android:textColor="@color/selector_day_chip_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/cbMiercoles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:button="@null"
+            android:background="@drawable/selector_day_chip"
+            android:checked="true"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="X"
+            android:textColor="@color/selector_day_chip_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/cbJueves"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:button="@null"
+            android:background="@drawable/selector_day_chip"
+            android:checked="true"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="J"
+            android:textColor="@color/selector_day_chip_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/cbViernes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:button="@null"
+            android:background="@drawable/selector_day_chip"
+            android:checked="true"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="V"
+            android:textColor="@color/selector_day_chip_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/cbSabado"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:button="@null"
+            android:background="@drawable/selector_day_chip"
+            android:checked="true"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="S"
+            android:textColor="@color/selector_day_chip_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/cbDomingo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:button="@null"
+            android:background="@drawable/selector_day_chip"
+            android:checked="false"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="D"
+            android:textColor="@color/selector_day_chip_text"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+    </GridLayout>
+
+    <!-- Confirm -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfirmarMeta"
+        style="@style/Widget.App.Button"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Guardar meta" />
+
+</LinearLayout>

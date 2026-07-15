@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurfaceVariant">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/profileScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="120dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivProfilePhoto"
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="32dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_user_placeholder"
+                android:contentDescription="@string/content_desc_user_photo"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="2dp" />
+
+            <TextView
+                android:id="@+id/tvProfileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="Usuario"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvProfileEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="13sp"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <include
+                android:id="@+id/rowSuscripcion"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowCuenta"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowCategorias"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowMovimientos"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowHistorialMetas"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowApariencia"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowNotificaciones"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowAyuda"
+                layout="@layout/view_setting_row" />
+
+            <include
+                android:id="@+id/rowInvitar"
+                layout="@layout/view_setting_row" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <include layout="@layout/layout_bottom_navigation" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

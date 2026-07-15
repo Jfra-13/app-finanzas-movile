@@ -3,14 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="12dp">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivUserPhoto"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_user_placeholder"
+        android:contentDescription="@string/content_desc_user_photo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
@@ -21,8 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:text="Buenos días,"
-        android:textColor="@color/text_gray"
-        android:textSize="12sp"
+        android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+        android:textColor="?attr/colorOnSurfaceVariant"
         app:layout_constraintBottom_toTopOf="@id/tvUserName"
         app:layout_constraintStart_toEndOf="@id/ivUserPhoto"
         app:layout_constraintTop_toTopOf="@id/ivUserPhoto"
@@ -34,21 +38,22 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:text="Jorge Ramirez"
-        android:textColor="@color/blue_dark"
-        android:textSize="15sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:textColor="?attr/colorOnSurface"
         app:layout_constraintBottom_toBottomOf="@id/ivUserPhoto"
         app:layout_constraintStart_toEndOf="@id/ivUserPhoto"
         app:layout_constraintTop_toBottomOf="@id/tvSayHelloUser" />
 
     <ImageView
         android:id="@+id/ivMenu"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="11dp"
         android:src="@drawable/ic_menu"
+        android:contentDescription="@string/content_desc_menu"
         app:layout_constraintBottom_toBottomOf="@id/ivUserPhoto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/ivUserPhoto"
-        app:tint="@color/blue_dark" />
+        app:tint="?attr/colorOnSurfaceVariant" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

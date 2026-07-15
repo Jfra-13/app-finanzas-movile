@@ -1,14 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Brand literals — never invert these -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="bg_gray">#F0F0F2</color>
-
     <color name="blue_primary">#4579BC</color>
     <color name="blue_dark">#2B558C</color>
     <color name="blue_divider">#A0C3D9</color>
 
+    <!-- Chart palette — ingreso reuses blue_primary; egreso is a soft red -->
+    <color name="chart_egreso">#E57373</color>
+
+    <!-- Legacy text/bg — kept for backward compat; overridden in values-night -->
+    <color name="bg_gray">#F0F0F2</color>
     <color name="text_gray">#888888</color>
     <color name="text_dark">#555555</color>
     <color name="text_black_soft">#222222</color>
+
+    <!-- Semantic tokens — LIGHT -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#E4E7EC</color>
+    <color name="surface_container">#E8E9ED</color>
+    <color name="on_surface">#222222</color>
+    <color name="on_surface_variant">#555555</color>
+    <color name="background">#E4E7EC</color>
+    <color name="outline">#C4C4C4</color>
+    <color name="outline_variant">#E0E0E0</color>
+    <color name="primary_container">#DCE7F3</color>
+    <color name="on_primary_container">#0F2942</color>
+    <color name="success">#2E7D32</color>
+    <color name="warning">#E65100</color>
+    <color name="error_red">#B00020</color>
+
+    <!-- Financial-health severity — accent + soft container (LIGHT) -->
+    <color name="health_danger">#D64550</color>
+    <color name="health_danger_bg">#FBEAEC</color>
+    <color name="health_positive">#2E7D32</color>
+    <color name="health_positive_bg">#E8F3EA</color>
+    <color name="health_info">#4579BC</color>
+    <color name="health_info_bg">#E9F1F9</color>
 </resources>
