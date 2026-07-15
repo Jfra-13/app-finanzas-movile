@@ -22,7 +22,7 @@ Kotlin · Android View System (XML + ViewBinding, **no Compose**) · MVVM con Co
 Retrofit 2 + OkHttp · Room (offline-first) · Hilt (DI) · Vico (gráficos) · EncryptedSharedPreferences.
 
 Arquitectura Clean por capas: **UI → ViewModel → Repository → Retrofit/Room**. El detalle técnico
-completo está en [`planeamiento/ARQUITECTURA.md`](planeamiento/ARQUITECTURA.md).
+completo está en [`planeamiento/ARQUITECTURA.md`](docs/planeamiento/ARQUITECTURA.md).
 
 ```
 core/network   ← Retrofit, envelope ApiResponse, ApiResult, AppError, interceptores, safeApiCall
@@ -84,8 +84,8 @@ El prefijo `/api/v1` lo agrega la capa de red, no la base URL.
 
 | Documento | Contenido |
 |---|---|
-| [`planeamiento/ARQUITECTURA.md`](planeamiento/ARQUITECTURA.md) | Especificación técnica del estado objetivo (capas, red, sesión, offline, DI, testing). |
-| [`planeamiento/PLAN.md`](planeamiento/PLAN.md) | Roadmap por fases con estado (✅ / – / pendiente) y subtareas. |
+| [`planeamiento/ARQUITECTURA.md`](docs/planeamiento/ARQUITECTURA.md) | Especificación técnica del estado objetivo (capas, red, sesión, offline, DI, testing). |
+| [`planeamiento/PLAN.md`](docs/planeamiento/PLAN.md) | Roadmap por fases con estado (✅ / – / pendiente) y subtareas. |
 | [`docs/API-CONTRACT.md`](docs/API-CONTRACT.md) | Contrato de la API REST (fuente de verdad del cliente). |
 | [`docs/backend-analytics.md`](docs/backend-analytics.md) · [`docs/backend-profile.md`](docs/backend-profile.md) | Requerimientos pedidos al equipo de backend. |
 
