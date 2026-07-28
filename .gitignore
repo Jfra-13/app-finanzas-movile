@@ -1,22 +1,33 @@
 *.iml
 .gradle
 /local.properties
+local.properties
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+.kotlin
+
+# Android Studio / IntelliJ — machine or session specific
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+/.idea/appInsightsSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deviceManager.xml
+
+# Agent tooling caches (regenerated locally)
+/.atl/.skill-registry.cache.json
+/.claude/settings.local.json
 
 # Ad-hoc error/log dumps (not source)
 Error_*.txt
 
-# Local-only (not published to GitHub)
-/CLAUDE.md
-/docs/
+# Signing material — never commit
+*.jks
+*.keystore
+keystore.properties

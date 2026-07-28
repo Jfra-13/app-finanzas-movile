@@ -3,7 +3,7 @@
 Aplicación móvil nativa (Kotlin) para que trabajadores independientes registren sus ingresos y
 egresos y controlen su **meta mensual** mediante una **cuota diaria** calculada por el backend.
 Es el cliente móvil de la plataforma Finanzas Independientes; consume una API REST cuyo contrato
-vive en [`docs/API-CONTRACT.md`](docs/API-CONTRACT.md).
+vive en [`docs/api/API-CONTRACT.md`](docs/api/API-CONTRACT.md).
 
 ## Funcionalidades
 
@@ -22,7 +22,7 @@ Kotlin · Android View System (XML + ViewBinding, **no Compose**) · MVVM con Co
 Retrofit 2 + OkHttp · Room (offline-first) · Hilt (DI) · Vico (gráficos) · EncryptedSharedPreferences.
 
 Arquitectura Clean por capas: **UI → ViewModel → Repository → Retrofit/Room**. El detalle técnico
-completo está en [`planeamiento/ARQUITECTURA.md`](docs/planeamiento/ARQUITECTURA.md).
+completo está en [`docs/planeamiento/ARQUITECTURA.md`](docs/planeamiento/ARQUITECTURA.md).
 
 ```
 core/network   ← Retrofit, envelope ApiResponse, ApiResult, AppError, interceptores, safeApiCall
@@ -65,6 +65,11 @@ gradlew.bat clean                     # limpiar build
 
 > En Unix, reemplazá `gradlew.bat` por `./gradlew`.
 
+> **Máquina nueva:** el repo no necesita ninguna credencial ni archivo secreto para compilar debug.
+> Alcanza con JDK 17, el Android SDK (API 36) y el `local.properties` que genera Android Studio.
+> Todavía no hay keystore de release: cuando se firme el APK, el `.jks` y su `keystore.properties`
+> quedan fuera del repo (ya están en `.gitignore`).
+
 ## Conexión con el backend
 
 `BASE_URL` se inyecta por `buildConfigField` según el build type — **nunca hardcodeada**:
@@ -82,12 +87,20 @@ El prefijo `/api/v1` lo agrega la capa de red, no la base URL.
 
 ## Documentación
 
+Todo vive bajo [`docs/`](docs/): `docs/api/` es el contrato con el backend, `docs/planeamiento/` el
+roadmap y la arquitectura objetivo.
+
 | Documento | Contenido |
 |---|---|
-| [`planeamiento/ARQUITECTURA.md`](docs/planeamiento/ARQUITECTURA.md) | Especificación técnica del estado objetivo (capas, red, sesión, offline, DI, testing). |
-| [`planeamiento/PLAN.md`](docs/planeamiento/PLAN.md) | Roadmap por fases con estado (✅ / – / pendiente) y subtareas. |
-| [`docs/API-CONTRACT.md`](docs/API-CONTRACT.md) | Contrato de la API REST (fuente de verdad del cliente). |
-| [`docs/backend-analytics.md`](docs/backend-analytics.md) · [`docs/backend-profile.md`](docs/backend-profile.md) | Requerimientos pedidos al equipo de backend. |
+| [`docs/planeamiento/ARQUITECTURA.md`](docs/planeamiento/ARQUITECTURA.md) | Especificación técnica del estado objetivo (capas, red, sesión, offline, DI, testing). |
+| [`docs/planeamiento/PLAN.md`](docs/planeamiento/PLAN.md) | Roadmap por fases con estado (✅ / – / pendiente) y subtareas. |
+| [`docs/planeamiento/PLAN-FASE-6.md`](docs/planeamiento/PLAN-FASE-6.md) · [`PLAN-INTEGRACION-BACKEND.md`](docs/planeamiento/PLAN-INTEGRACION-BACKEND.md) | Planes de la fase en curso e integración con backend. |
+| [`docs/api/API-CONTRACT.md`](docs/api/API-CONTRACT.md) | Contrato de la API REST (fuente de verdad del cliente). |
+| [`docs/api/ENDPOINTS-AUDIT.md`](docs/api/ENDPOINTS-AUDIT.md) | Auditoría endpoint por endpoint: qué consume el cliente vs. qué expone el backend. |
+| [`docs/api/backend-analytics.md`](docs/api/backend-analytics.md) · [`backend-profile.md`](docs/api/backend-profile.md) | Requerimientos pedidos al equipo de backend. |
+| [`CLAUDE.md`](CLAUDE.md) | Reglas del proyecto para agentes de IA (stack, arquitectura, convenciones). |
+
+**Repo del backend:** [`Jfra-13/api-finanzas-backend`](https://github.com/Jfra-13/api-finanzas-backend) — hay que levantarlo en `:9090` para desarrollar contra local.
 
 ## Convenciones
 
