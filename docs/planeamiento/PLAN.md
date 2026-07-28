@@ -63,7 +63,7 @@ Estado reflejado según el código al **2026-07-28**.
 | 6 | – | UI/UX y design system | Sistema visual, estados, accesibilidad, dark mode; **falta responsive** | 7 |
 | 7 | – | Rendimiento | Paginación e infinite scroll, caché offline, Splash API; **falta sync completa** | 9 |
 | 8 | – | Seguridad endurecida | Cleartext off, network security config, R8, backups; **falta pinning y FLAG_SECURE** | 9 |
-| 9 | | Calidad y testing | Unit, repos, UI tests, CI | 10 |
+| 9 | – | Calidad y testing | Unit del core de red, mappers, ViewModel, CI; **falta Espresso y cobertura de ViewModels** | 10 |
 | 10 | | Release | Signing, variantes, Play Store | — |
 
 ---
@@ -256,20 +256,26 @@ Estado reflejado según el código al **2026-07-28**.
 
 ---
 
-## Fase 9 — Calidad y testing _(pendiente)_
+## Fase 9 – — Calidad y testing
 
 **Objetivo:** red de seguridad para iterar sin miedo.
 
+Punto de partida: 12 tests, todos de use cases. Hoy: **34**.
+
 **Tareas:**
-1. **Unit:** use cases (ya iniciado), mappers, lógica de ViewModels (con repos fake).
-2. **Repository tests:** con `MockWebServer` validando el parseo del envelope y el manejo de `code`.
-3. **Auth tests:** flujo de refresh (401 → refresh → retry), refresh inválido → logout.
-4. **UI tests:** Espresso en flujos críticos (login, registrar transacción, fijar meta).
-5. **CI:** pipeline que corre lint + tests en cada push/PR.
+1. Unit: ✅ use cases (ya venían), ✅ mappers estructurales, **parcial** ViewModels — solo `AccountViewModel` (con repo fake). Quedan 14 ViewModels sin cubrir.
+2. ✅ **`MockWebServer`** validando el parseo del envelope y el manejo de `code`, en `SafeApiCallTest`. Se testea el embudo (`safeApiCall`/`safeUnitCall`) y no cada repository: ahí es donde vive la lógica, un test por repo sería re-testear Retrofit.
+3. ✅ **Auth tests:** `TokenAuthenticatorTest` cubre 401 → refresh → retry, refresh inválido → logout, reuso del token si otro hilo ya refrescó, y corte de reintentos.
+4. **UI tests (Espresso): pendiente.** Necesita emulador en CI, es lento y frágil; se pospone hasta que los flujos de UI dejen de moverse.
+5. ✅ **CI:** `.github/workflows/ci.yml` corre tests + `assembleDebug` + `assembleRelease` en cada push a `main` y en cada PR. El release entra al gate porque es el único paso que ejecuta R8.
 
 **Definition of Done:**
-- Flujos críticos cubiertos por tests.
-- CI verde como gate de merge.
+- Flujos críticos cubiertos por tests — ✅ los de red y sesión; falta la capa de UI.
+- ✅ CI verde como gate de merge.
+
+**Nota de calidad:** los tests de `TokenAuthenticator` se validaron por mutación
+(persistir el refresh token viejo en vez del rotado) para confirmar que fallan
+cuando la lógica se rompe, no solo que pasan.
 
 **Riesgo:** Bajo-medio.
 
