@@ -79,4 +79,8 @@ dependencies {
     // Splash Screen API: fast, themed cold-start (Fase 7)
     implementation(libs.androidx.core.splashscreen)
     testImplementation(libs.kotlinx.coroutines.test)
+    // MockWebServer: drives the real Retrofit + Gson stack in unit tests so the
+    // envelope parsing and the refresh flow are exercised, not mocked away.
+    testImplementation(platform(libs.okhttp.bom))
+    testImplementation(libs.okhttp.mockwebserver)
 }
