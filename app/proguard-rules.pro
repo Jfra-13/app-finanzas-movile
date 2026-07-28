@@ -1,21 +1,24 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
+# R8 rules for the release build (isMinifyEnabled = true).
 #
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Only what this app actually needs: Retrofit, OkHttp, Room, Hilt and Vico all
+# ship their own consumer rules inside their artifacts, so nothing is repeated
+# here. What those do NOT cover is Gson, which maps JSON onto our own classes
+# by reflection.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Readable stack traces from release crashes: keep line numbers while hiding
+# the original file name behind "SourceFile".
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Retrofit reads generic return types (ApiResponse<T>) and method annotations
+# at runtime; both are stripped by default.
+-keepattributes Signature,InnerClasses,EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,AnnotationDefault
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# --- Gson ---
+# Gson derives JSON keys from field names, so every class it (de)serializes
+# must keep them. Methods are still shrunk: only the fields are pinned.
+-keep class com.example.finanzas_independientes_app.data.remote.dto.** { <fields>; }
+-keep class com.example.finanzas_independientes_app.core.network.ApiResponse { <fields>; }
+-keep class com.example.finanzas_independientes_app.core.network.ErrorDetail { <fields>; }
+-keep class com.example.finanzas_independientes_app.core.network.ErrorEnvelope { <fields>; }
