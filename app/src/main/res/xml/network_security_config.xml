@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Release posture: HTTPS only, system trust anchors, no user-installed CAs.
+    The debug build type overlays this same file name (src/debug/res/xml) to
+    allow cleartext against the local backend at 10.0.2.2.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

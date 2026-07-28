@@ -1,5 +1,12 @@
 # Plan Fase 6 — cierre de P0/P1 (ítems desbloqueados)
 
+> **Estado al 2026-07-28: implementado y mergeado a `main`.** Las tres sub-fases
+> viajan en el commit `a70bd9f`; `:app:assembleDebug` y `:app:testDebugUnitTest`
+> quedan verdes. Lo único abierto es externo al front: el deploy del stack del
+> backend y la verificación funcional contra el entorno real (ver
+> "Pedidos pendientes a backend"). El trabajo siguió por Fase 8 de `PLAN.md`
+> (seguridad endurecida).
+
 Fecha: 2026-07-14. Continúa `PLAN-INTEGRACION-BACKEND.md` (Fase 6 era el bucket
 "Bloqueado"). Con las respuestas del backend, tres de sus ítems pasaron a
 **contrato sellado** y son implementables. Este doc los baja a plan de ejecución.

@@ -50,7 +50,7 @@ El cliente original fue construido contra un contrato anterior del backend. Hoy 
 ## Mapa de fases
 
 **Leyenda de estado:** `✅` terminada · `–` a pulir (funcional, con pendientes) · *(vacío)* sin empezar.
-Estado reflejado según el código al **2026-07-08**.
+Estado reflejado según el código al **2026-07-28**.
 
 | Fase | Estado | Nombre | Foco | Bloquea a |
 |---|---|---|---|---|
@@ -62,7 +62,7 @@ Estado reflejado según el código al **2026-07-08**.
 | 5 | ✅ | Analíticas y visualización | Gráficos (semanal, tendencia, categorías), salud financiera | 6 |
 | 6 | – | UI/UX y design system | Sistema visual, estados, accesibilidad, dark mode; **falta responsive** | 7 |
 | 7 | – | Rendimiento | Paginación e infinite scroll, caché offline, Splash API; **falta sync completa** | 9 |
-| 8 | | Seguridad endurecida | Cleartext off, network security config, R8, pinning | 9 |
+| 8 | – | Seguridad endurecida | Cleartext off, network security config, R8, backups; **falta pinning y FLAG_SECURE** | 9 |
 | 9 | | Calidad y testing | Unit, repos, UI tests, CI | 10 |
 | 10 | | Release | Signing, variantes, Play Store | — |
 
@@ -235,22 +235,22 @@ Estado reflejado según el código al **2026-07-08**.
 
 ---
 
-## Fase 8 — Seguridad endurecida _(pendiente)_
+## Fase 8 – — Seguridad endurecida
 
 **Objetivo:** cerrar la superficie de ataque antes de release.
 
 **Tareas:**
-1. **Desactivar `usesCleartextTraffic`** global. Network Security Config: cleartext solo para `10.0.2.2` en debug; HTTPS forzado en release.
-2. **Certificate pinning** contra el dominio productivo.
-3. **R8/ProGuard** con ofuscación y `minify` en release; reglas para Retrofit/Gson.
-4. Verificar que tokens y datos sensibles solo viven en almacenamiento cifrado (cierre de la Fase 2).
-5. `FLAG_SECURE` en pantallas sensibles si aplica; deshabilitar backups de datos sensibles (`allowBackup`/reglas de backup).
-6. Revisión de logs: ningún token ni PII en logs de release.
+1. ✅ **Desactivar `usesCleartextTraffic`** global. Network Security Config: cleartext solo para `10.0.2.2`/`localhost`/`127.0.0.1` en debug (overlay en `src/debug/res/xml/`); HTTPS forzado en release y en el resto de los hosts de debug.
+2. **Certificate pinning** contra el dominio productivo. **Pendiente:** requiere el certificado real de `businesscontrol.azurewebsites.net` y un plan de rotación antes de tocar código; un pin vencido deja la app sin red.
+3. ✅ **R8/ProGuard** con ofuscación, `minify` y `shrinkResources` en release. APK 17,2 MB → 6,6 MB. Reglas propias solo para Gson (los DTOs y el envelope fijan sus fields); Retrofit/OkHttp/Room/Hilt/Vico traen sus consumer rules.
+4. ✅ Tokens solo en `EncryptedSecureStorage` (EncryptedSharedPreferences + master key en Keystore); ningún `SharedPreferences` plano guarda credenciales.
+5. `FLAG_SECURE` en pantallas sensibles: **pendiente**, es decisión de producto (bloquea capturas de pantalla legítimas del usuario). ✅ Backups: `allowBackup="false"` y exclusiones reales de `sharedpref`/`database` en ambos archivos de reglas, incluida la transferencia device-to-device de API 31+.
+6. ✅ Logs: `HttpLoggingInterceptor` ya está en `Level.NONE` fuera de debug (`NetworkModule.kt`).
 
 **Definition of Done:**
-- Release sin cleartext.
-- APK ofuscado.
-- Security review (skill `/security-review`) sin hallazgos críticos.
+- ✅ Release sin cleartext.
+- ✅ APK ofuscado.
+- Security review (skill `/security-review`) sin hallazgos críticos — pendiente de correr.
 
 **Riesgo:** Medio. El pinning mal hecho rompe conectividad — plan de rotación de certificados.
 
