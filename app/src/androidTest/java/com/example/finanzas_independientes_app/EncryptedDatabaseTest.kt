@@ -1,7 +1,6 @@
 package com.example.finanzas_independientes_app
 
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.finanzas_independientes_app.core.session.SecureStorage
@@ -13,7 +12,6 @@ import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -36,15 +34,9 @@ class EncryptedDatabaseTest {
         )
         db.close()
 
-        val path = context.getDatabasePath(AppDatabase.NAME).path
-        try {
-            SQLiteDatabase.openDatabase(path, null, SQLiteDatabase.OPEN_READONLY).use {
-                it.rawQuery("SELECT * FROM transacciones", null).close()
-            }
-            fail("Plain SQLite read an encrypted database")
-        } catch (expected: SQLiteException) {
-            // "file is not a database": the content is ciphertext.
-        }
+        // Every plain SQLite file starts with this header; SQLCipher's starts with random salt.
+        val header = context.getDatabasePath(AppDatabase.NAME).inputStream().use { input -> ByteArray(16).also { input.read(it) } }
+        assertFalse(header.contentEquals("SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)))
     }
 
     @Test

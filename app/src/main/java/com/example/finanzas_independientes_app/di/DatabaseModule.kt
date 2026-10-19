@@ -33,7 +33,14 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         System.loadLibrary("sqlcipher")
-        val passphrase = databasePassphrase(context, EncryptedSecureStorage(context, KEY_FILE))
+        val passphrase = try {
+            databasePassphrase(context, EncryptedSecureStorage(context, KEY_FILE))
+        } catch (e: Exception) {
+            // Keystore reset or corrupt key file: the old key is gone for good, and
+            // crashing here would crash every launch. Start over with a new key.
+            context.deleteSharedPreferences(KEY_FILE)
+            databasePassphrase(context, EncryptedSecureStorage(context, KEY_FILE))
+        }
         return Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NAME)
             .openHelperFactory(SupportOpenHelperFactory(passphrase))
             .fallbackToDestructiveMigration(dropAllTables = true)
