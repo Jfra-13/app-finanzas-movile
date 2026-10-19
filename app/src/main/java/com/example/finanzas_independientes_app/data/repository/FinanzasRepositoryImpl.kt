@@ -32,6 +32,7 @@ import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
 import com.example.finanzas_independientes_app.domain.model.SaludFinancieraItem
 import com.example.finanzas_independientes_app.domain.model.Tendencia
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
+import com.example.finanzas_independientes_app.core.session.SessionManager
 import com.google.gson.Gson
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,8 +43,12 @@ class FinanzasRepositoryImpl @Inject constructor(
     private val gson: Gson,
     private val transaccionDao: TransaccionDao,
     private val categoriaDao: CategoriaDao,
-    private val metaDao: MetaDao
+    private val metaDao: MetaDao,
+    private val session: SessionManager
 ) : FinanzasRepository {
+
+    // A response that lands after logout must not refill the cache the wipe just emptied.
+    private val canCache: Boolean get() = session.isLoggedIn()
 
     // --- Transactions ---
 
@@ -76,7 +81,7 @@ class FinanzasRepositoryImpl @Inject constructor(
             is ApiResult.Success -> {
                 val paginated = result.data.toDomain()
                 // Cache only the unfiltered first page as the offline snapshot.
-                if (page == 0 && sinFiltros) {
+                if (page == 0 && sinFiltros && canCache) {
                     transaccionDao.replaceAll(paginated.content.map { it.toEntity() })
                 }
                 ApiResult.Success(paginated, result.code)
@@ -176,7 +181,7 @@ class FinanzasRepositoryImpl @Inject constructor(
         return when (result) {
             is ApiResult.Success -> {
                 val meta = result.data.toDomain()
-                metaDao.replaceActiva(meta.toEntity())
+                if (canCache) metaDao.replaceActiva(meta.toEntity())
                 ApiResult.Success(meta, result.code)
             }
             is ApiResult.Error -> {
@@ -205,7 +210,7 @@ class FinanzasRepositoryImpl @Inject constructor(
         return when (result) {
             is ApiResult.Success -> {
                 val categorias = result.data.map { it.toDomain() }
-                categoriaDao.replaceAll(categorias.map { it.toEntity() })
+                if (canCache) categoriaDao.replaceAll(categorias.map { it.toEntity() })
                 ApiResult.Success(categorias, result.code)
             }
             is ApiResult.Error -> {
