@@ -1,5 +1,7 @@
 # Requerimientos de Backend — Perfil, Cuenta y Gestión de Usuario
 
+> **Spec histórica.** Lo que se implementó tiene su contrato final en [API-CONTRACT.md](API-CONTRACT.md), y donde difieran manda ese documento. Lo que no figura ahí sigue sin implementar (bucket P2).
+
 Documento de trabajo para el equipo de backend. Define **todo** lo que la app móvil necesita
 para que las pantallas de **Perfil** y **Cuenta** dejen de mostrar botones "Próximamente" y
 queden funcionales, más los huecos de **Categorías**, **Calendario** e **Historial de metas**.

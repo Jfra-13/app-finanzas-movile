@@ -1,5 +1,7 @@
 # Requerimientos de Backend — Analíticas y Recomendaciones
 
+> **Spec histórica.** Lo que se implementó tiene su contrato final en [API-CONTRACT.md](API-CONTRACT.md), y donde difieran manda ese documento. Lo que no figura ahí sigue sin implementar (bucket P2).
+
 Documento de trabajo para el equipo de backend. Define **todo** lo que la app móvil necesita
 para que la sección de **Analíticas** deje de ser sólo descriptiva (fotos del pasado) y pase a
 entregar información comparable, proyectada y **recomendaciones financieras accionables**.
