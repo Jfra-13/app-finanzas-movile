@@ -76,6 +76,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    // SQLCipher: encrypts finanzas.db at rest (ships its own R8 consumer rules)
+    implementation(libs.sqlcipher.android)
     // Splash Screen API: fast, themed cold-start (Fase 7)
     implementation(libs.androidx.core.splashscreen)
     testImplementation(libs.kotlinx.coroutines.test)

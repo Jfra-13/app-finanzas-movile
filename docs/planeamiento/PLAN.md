@@ -244,6 +244,7 @@ Estado reflejado según el código al **2026-07-28**.
 2. **Certificate pinning** contra el dominio productivo. **Pendiente:** requiere el certificado real de `businesscontrol.azurewebsites.net` y un plan de rotación antes de tocar código; un pin vencido deja la app sin red.
 3. ✅ **R8/ProGuard** con ofuscación, `minify` y `shrinkResources` en release. APK 17,2 MB → 6,6 MB. Reglas propias solo para Gson (los DTOs y el envelope fijan sus fields); Retrofit/OkHttp/Room/Hilt/Vico traen sus consumer rules.
 4. ✅ Tokens solo en `EncryptedSecureStorage` (EncryptedSharedPreferences + master key en Keystore); ningún `SharedPreferences` plano guarda credenciales.
+   ✅ `finanzas.db` cifrada con **SQLCipher** (`sqlcipher-android`); passphrase aleatoria de 256 bits en un archivo `EncryptedSecureStorage` propio (`finanzas_db_key`) que el logout no borra. Sin clave guardada, el archivo existente se elimina y Room lo recrea (cubre la migración desde la base plana). Costo: el APK release pasa de 6,6 MB a 26 MB por los `.so` de 4 ABIs; con AAB en Play cada dispositivo baja solo el suyo.
 5. `FLAG_SECURE` en pantallas sensibles: **pendiente**, es decisión de producto (bloquea capturas de pantalla legítimas del usuario). ✅ Backups: `allowBackup="false"` y exclusiones reales de `sharedpref`/`database` en ambos archivos de reglas, incluida la transferencia device-to-device de API 31+.
 6. ✅ Logs: `HttpLoggingInterceptor` ya está en `Level.NONE` fuera de debug (`NetworkModule.kt`).
 

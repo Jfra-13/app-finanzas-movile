@@ -9,7 +9,10 @@ import androidx.security.crypto.MasterKey
  * [SecureStorage] backed by EncryptedSharedPreferences. Keys and values are
  * encrypted at rest with a key held in the Android Keystore.
  */
-class EncryptedSecureStorage(context: Context) : SecureStorage {
+class EncryptedSecureStorage(
+    context: Context,
+    fileName: String = FILE_NAME
+) : SecureStorage {
 
     private val prefs: SharedPreferences = run {
         val masterKey = MasterKey.Builder(context.applicationContext)
@@ -17,7 +20,7 @@ class EncryptedSecureStorage(context: Context) : SecureStorage {
             .build()
         EncryptedSharedPreferences.create(
             context.applicationContext,
-            FILE_NAME,
+            fileName,
             masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
