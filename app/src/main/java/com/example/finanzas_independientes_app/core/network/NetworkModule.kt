@@ -24,10 +24,13 @@ object NetworkModule {
 
     fun provideGson(): Gson = Gson()
 
+    fun provideHttpCache(cacheDir: File): Cache =
+        Cache(File(cacheDir, "http_cache"), HTTP_CACHE_SIZE_BYTES)
+
     fun provideApi(
         gson: Gson,
         session: SessionManager,
-        cacheDir: File,
+        httpCache: Cache,
         onSessionExpired: () -> Unit
     ): FinanzasApi {
         val logging = HttpLoggingInterceptor().apply {
@@ -43,7 +46,6 @@ object NetworkModule {
         val refreshApi = retrofit(refreshClient, gson).create(RefreshApi::class.java)
         val authenticator = TokenAuthenticator(session, refreshApi, onSessionExpired)
 
-        val httpCache = Cache(File(cacheDir, "http_cache"), HTTP_CACHE_SIZE_BYTES)
         val mainClient = baseClientBuilder(logging)
             .cache(httpCache)
             .addInterceptor(AuthInterceptor(session))

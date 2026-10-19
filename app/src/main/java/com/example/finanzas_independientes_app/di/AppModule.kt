@@ -6,6 +6,7 @@ import com.example.finanzas_independientes_app.core.network.NetworkModule
 import com.example.finanzas_independientes_app.core.session.EncryptedSecureStorage
 import com.example.finanzas_independientes_app.core.session.SecureStorage
 import com.example.finanzas_independientes_app.core.session.SessionManager
+import com.example.finanzas_independientes_app.data.local.UserDataWiper
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
 import com.example.finanzas_independientes_app.presentation.auth.LoginActivity
 import com.google.gson.Gson
@@ -14,6 +15,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Cache
 import javax.inject.Singleton
 
 /**
@@ -41,15 +43,26 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideHttpCache(@ApplicationContext context: Context): Cache =
+        NetworkModule.provideHttpCache(context.cacheDir)
+
+    @Provides
+    @Singleton
     fun provideApi(
         gson: Gson,
         session: SessionManager,
+        httpCache: Cache,
+        wiper: UserDataWiper,
         @ApplicationContext context: Context
     ): FinanzasApi = NetworkModule.provideApi(
         gson = gson,
         session = session,
-        cacheDir = context.cacheDir,
-        onSessionExpired = { redirectToLogin(context) }
+        httpCache = httpCache,
+        // Runs on an OkHttp thread, so the blocking wipe is safe here.
+        onSessionExpired = {
+            wiper.wipe()
+            redirectToLogin(context)
+        }
     )
 
     private fun redirectToLogin(context: Context) {

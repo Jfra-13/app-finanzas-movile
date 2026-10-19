@@ -4,6 +4,7 @@ import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.core.network.safeApiCall
 import com.example.finanzas_independientes_app.core.network.safeUnitCall
 import com.example.finanzas_independientes_app.core.session.SessionManager
+import com.example.finanzas_independientes_app.data.local.UserDataWiper
 import com.example.finanzas_independientes_app.data.mapper.toAuthSession
 import com.example.finanzas_independientes_app.data.remote.FinanzasApi
 import com.example.finanzas_independientes_app.data.remote.dto.DeleteAccountRequest
@@ -20,6 +21,8 @@ import com.example.finanzas_independientes_app.domain.model.AuthSession
 import com.example.finanzas_independientes_app.domain.model.Perfil
 import com.example.finanzas_independientes_app.domain.repository.AuthRepository
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,7 +30,8 @@ import javax.inject.Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val api: FinanzasApi,
     private val gson: Gson,
-    private val session: SessionManager
+    private val session: SessionManager,
+    private val wiper: UserDataWiper
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): ApiResult<AuthSession> {
@@ -100,15 +104,25 @@ class AuthRepositoryImpl @Inject constructor(
             // Best-effort revocation; idempotent server-side, result ignored on purpose.
             safeUnitCall(gson) { api.logout(RefreshRequest(refresh)) }
         }
-        session.clear()
+        endSession()
     }
 
     override suspend fun eliminarCuenta(password: String): ApiResult<Unit> {
         val result = safeUnitCall(gson) { api.eliminarCuenta(DeleteAccountRequest(password)) }
         if (result is ApiResult.Success) {
             // Server already revoked every token; drop the local session too.
-            session.clear()
+            endSession()
         }
         return result
+    }
+
+    /**
+     * Drops tokens first, then every cached byte of this user's data. Tokens go
+     * first so a failed wipe still logs out, and so late responses see no
+     * session and skip writing to the cache.
+     */
+    private suspend fun endSession() {
+        session.clear()
+        withContext(Dispatchers.IO) { wiper.wipe() }
     }
 }

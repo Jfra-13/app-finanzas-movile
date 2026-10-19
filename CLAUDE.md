@@ -65,3 +65,16 @@ Every API call returns a sealed `ApiResult<T>` (`Success(data, code)` / `Error(A
 - Domain identifiers and class names are in **Spanish** (Transaccion, Meta, Categoria, CalcularCuotaDiariaUseCase) — match the existing code. Comments/docs default to English per the surrounding file.
 - DTOs stay in `data/remote/dto`; map to domain models before crossing into `presentation`.
 - Every domain use case ships with a unit test.
+
+## Security rules
+
+Non-negotiable. A change that breaks one of these does not merge.
+
+- **Tokens and credentials** live only in `EncryptedSecureStorage` (EncryptedSharedPreferences, master key in the Android Keystore). Never in plain `SharedPreferences`, Room, files, logs, or Intent extras.
+- **Auth header** is added only by `AuthInterceptor`; 401 handling (refresh → retry, or `session.clear()` + redirect to login) lives only in `TokenAuthenticator`. Screens never attach tokens or handle 401 themselves.
+- **Logout and session expiry** must wipe every trace of the user: secure storage, Room cache, and the OkHttp disk cache.
+- **HTTPS only.** `cleartextTrafficPermitted="false"` in `res/xml/network_security_config.xml`; cleartext is allowed only for `10.0.2.2`/`localhost`/`127.0.0.1` in the `src/debug` overlay. Never set `usesCleartextTraffic`, never trust user CAs in release.
+- **Logging:** `HttpLoggingInterceptor` is `Level.BODY` only when `BuildConfig.DEBUG`, `Level.NONE` otherwise. No `Log.*`/`println` with tokens, passwords, emails, or financial amounts.
+- **No hardcoded URLs or secrets.** `BASE_URL` and any key come from `buildConfigField` per build type; signing keys and secrets stay out of the repo (CI secrets / `local.properties`).
+- **Sensitive data at rest:** `finanzas.db` and session prefs stay excluded from backup (`allowBackup="false"` + `backup_rules.xml` + `data_extraction_rules.xml`). Room caches only what offline reads need, and every cached query is scoped to the current user.
+- **Release** keeps R8 (`isMinifyEnabled`, `shrinkResources`) on.
