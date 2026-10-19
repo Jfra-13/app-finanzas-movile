@@ -246,6 +246,7 @@ Estado reflejado según el código al **2026-07-28**.
 4. ✅ Tokens solo en `EncryptedSecureStorage` (EncryptedSharedPreferences + master key en Keystore); ningún `SharedPreferences` plano guarda credenciales.
 5. `FLAG_SECURE` en pantallas sensibles: **pendiente**, es decisión de producto (bloquea capturas de pantalla legítimas del usuario). ✅ Backups: `allowBackup="false"` y exclusiones reales de `sharedpref`/`database` en ambos archivos de reglas, incluida la transferencia device-to-device de API 31+.
 6. ✅ Logs: `HttpLoggingInterceptor` ya está en `Level.NONE` fuera de debug (`NetworkModule.kt`).
+7. ✅ **Fin de sesión sin rastro:** logout, baja de cuenta y refresh fallido borran Room y el caché HTTP (`UserDataWiper`); los repositories no escriben caché sin sesión activa. Antes, otra cuenta en el mismo dispositivo veía datos del usuario anterior offline.
 
 **Definition of Done:**
 - ✅ Release sin cleartext.
