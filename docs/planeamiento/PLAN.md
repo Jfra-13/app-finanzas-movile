@@ -260,10 +260,10 @@ Estado reflejado según el código al **2026-07-28**.
 
 **Objetivo:** red de seguridad para iterar sin miedo.
 
-Punto de partida: 12 tests, todos de use cases. Hoy: **34**.
+Punto de partida: 12 tests, todos de use cases. Hoy: **133**.
 
 **Tareas:**
-1. Unit: ✅ use cases (ya venían), ✅ mappers estructurales, **parcial** ViewModels — solo `AccountViewModel` (con repo fake). Quedan 14 ViewModels sin cubrir.
+1. Unit: ✅ use cases (ya venían), ✅ mappers estructurales, ✅ ViewModels — los 15, con repos fake compartidos en `test/.../fakes/` (`LoginViewModel` en su propio PR). Los tests destaparon tres bugs de producción que se arreglan aparte: la recarga de `TransaccionesViewModel` queda bloqueada tras borrar/editar, `ingresoHoy` del dashboard puede mostrar un mensaje de error, y Dashboard rechaza montos con coma mientras Categorías los acepta.
 2. ✅ **`MockWebServer`** validando el parseo del envelope y el manejo de `code`, en `SafeApiCallTest`. Se testea el embudo (`safeApiCall`/`safeUnitCall`) y no cada repository: ahí es donde vive la lógica, un test por repo sería re-testear Retrofit.
 3. ✅ **Auth tests:** `TokenAuthenticatorTest` cubre 401 → refresh → retry, refresh inválido → logout, reuso del token si otro hilo ya refrescó, y corte de reintentos.
 4. **UI tests (Espresso): pendiente.** Necesita emulador en CI, es lento y frágil; se pospone hasta que los flujos de UI dejen de moverse.
