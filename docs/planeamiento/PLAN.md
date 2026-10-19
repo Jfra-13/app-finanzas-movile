@@ -241,7 +241,7 @@ Estado reflejado según el código al **2026-07-28**.
 
 **Tareas:**
 1. ✅ **Desactivar `usesCleartextTraffic`** global. Network Security Config: cleartext solo para `10.0.2.2`/`localhost`/`127.0.0.1` en debug (overlay en `src/debug/res/xml/`); HTTPS forzado en release y en el resto de los hosts de debug.
-2. **Certificate pinning** contra el dominio productivo. **Pendiente:** requiere el certificado real de `businesscontrol.azurewebsites.net` y un plan de rotación antes de tocar código; un pin vencido deja la app sin red.
+2. ✅ **Certificate pinning** a nivel raíz en `network_security_config.xml`: Microsoft TLS RSA Root G2 + respaldo DigiCert Global Root G2, con `expiration="2027-10-19"` (falla abierto, no deja la app sin red). La hoja y el intermedio de `*.azurewebsites.net` los rota Microsoft, por eso no se pinnean. **Mantenimiento:** antes de 2027-10-19 re-verificar la cadena (`openssl s_client -showcerts`) y renovar la fecha. Pinning real (clave propia + backup) queda para cuando haya dominio propio.
 3. ✅ **R8/ProGuard** con ofuscación, `minify` y `shrinkResources` en release. APK 17,2 MB → 6,6 MB. Reglas propias solo para Gson (los DTOs y el envelope fijan sus fields); Retrofit/OkHttp/Room/Hilt/Vico traen sus consumer rules.
 4. ✅ Tokens solo en `EncryptedSecureStorage` (EncryptedSharedPreferences + master key en Keystore); ningún `SharedPreferences` plano guarda credenciales.
 5. `FLAG_SECURE` en pantallas sensibles: **pendiente**, es decisión de producto (bloquea capturas de pantalla legítimas del usuario). ✅ Backups: `allowBackup="false"` y exclusiones reales de `sharedpref`/`database` en ambos archivos de reglas, incluida la transferencia device-to-device de API 31+.

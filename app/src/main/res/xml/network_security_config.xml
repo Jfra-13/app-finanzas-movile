@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Release posture: HTTPS only, system trust anchors, no user-installed CAs.
+    Release posture: HTTPS only, system trust anchors, no user-installed CAs,
+    production host pinned at root level.
     The debug build type overlays this same file name (src/debug/res/xml) to
     allow cleartext against the local backend at 10.0.2.2.
 -->
@@ -10,4 +11,24 @@
             <certificates src="system" />
         </trust-anchors>
     </base-config>
+    <!--
+        Pinned at root level only. *.azurewebsites.net is Microsoft-managed: the
+        leaf rotates every ~3 months and the issuing CA rotates among
+        "Microsoft TLS G2 RSA CA OCSP xx", so pinning either would break the app
+        on the next rotation. Checked 2026-10-19 against the live chain:
+        leaf -> Microsoft TLS G2 RSA CA OCSP 10 -> Microsoft TLS RSA Root G2
+        -> DigiCert Global Root G2.
+        The expiration makes the pin fail open instead of bricking networking if
+        Microsoft moves to another root. Renew the date (and re-check the chain)
+        before it passes; see docs/planeamiento/PLAN.md, phase 8.
+    -->
+    <domain-config>
+        <domain includeSubdomains="false">businesscontrol.azurewebsites.net</domain>
+        <pin-set expiration="2027-10-19">
+            <!-- Microsoft TLS RSA Root G2 (expires 2029-06-19) -->
+            <pin digest="SHA-256">SwPJlmyGOywAipWl7ZJUBwRIx7IZ0oMQL2psW26OKs0=</pin>
+            <!-- Backup: DigiCert Global Root G2, cross-signer of the above (expires 2038-01-15) -->
+            <pin digest="SHA-256">i7WTqTvh0OioIruIfFR4kMPnBqrS2rdiVPl/s2uC/CY=</pin>
+        </pin-set>
+    </domain-config>
 </network-security-config>
