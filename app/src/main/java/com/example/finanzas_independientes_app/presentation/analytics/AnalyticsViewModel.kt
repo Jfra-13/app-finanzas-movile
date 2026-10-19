@@ -16,6 +16,7 @@ import com.example.finanzas_independientes_app.domain.model.Tendencia
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
 import com.example.finanzas_independientes_app.domain.usecase.OrdenarSenalesSaludUseCase
+import com.example.finanzas_independientes_app.presentation.common.toMontoPositivo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -268,8 +269,8 @@ class AnalyticsViewModel @Inject constructor(
 
     /** Quick-add from the shared FAB. On success refreshes the analytics data. */
     fun registrarTransaccion(monto: String, tipo: String, descripcion: String?, categoriaId: Long?) {
-        val montoDouble = monto.trim().toDoubleOrNull()
-        if (montoDouble == null || montoDouble <= 0) {
+        val montoDouble = monto.toMontoPositivo()
+        if (montoDouble == null) {
             _mensajeUI.value = "Ingresá un monto válido (mayor a 0)"
             return
         }

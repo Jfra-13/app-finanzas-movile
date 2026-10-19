@@ -9,6 +9,7 @@ import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.domain.model.ProgresoMetas
 import com.example.finanzas_independientes_app.domain.model.ResumenSemanalDia
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
+import com.example.finanzas_independientes_app.presentation.common.toMontoPositivo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -141,8 +142,8 @@ class DashboardViewModel @Inject constructor(
         descripcion: String?,
         categoriaId: Long?
     ) {
-        val montoDouble = monto.trim().toDoubleOrNull()
-        if (montoDouble == null || montoDouble <= 0) {
+        val montoDouble = monto.toMontoPositivo()
+        if (montoDouble == null) {
             _mensajeUI.value = "Ingresá un monto válido (mayor a 0)"
             return
         }
@@ -176,8 +177,8 @@ class DashboardViewModel @Inject constructor(
      * On GOAL_SET refreshes quota + progress.
      */
     fun fijarMeta(montoObjetivo: String, diasLaborables: List<Int>) {
-        val monto = montoObjetivo.trim().toDoubleOrNull()
-        if (monto == null || monto <= 0) {
+        val monto = montoObjetivo.toMontoPositivo()
+        if (monto == null) {
             _mensajeUI.value = "Ingresá un monto objetivo válido"
             return
         }

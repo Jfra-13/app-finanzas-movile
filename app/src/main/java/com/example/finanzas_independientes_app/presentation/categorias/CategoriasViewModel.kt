@@ -6,6 +6,7 @@ import com.example.finanzas_independientes_app.core.network.ApiCode
 import com.example.finanzas_independientes_app.core.network.ApiResult
 import com.example.finanzas_independientes_app.core.network.AppError
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
+import com.example.finanzas_independientes_app.presentation.common.toMontoPositivo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -129,7 +130,7 @@ class CategoriasViewModel @Inject constructor(
 
     /** Upsert the monthly cap for a category. Amount must be at least 0.01. */
     fun fijarTope(categoriaId: Long, montoTexto: String) {
-        val monto = montoTexto.trim().replace(",", ".").toDoubleOrNull()
+        val monto = montoTexto.replace(",", ".").toMontoPositivo()
         if (monto == null || monto < 0.01) {
             _mensajeError.value = "Ingresá un monto válido (mayor a 0)."
             return

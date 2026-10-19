@@ -40,8 +40,8 @@ class QuickAddViewModel @Inject constructor(
     }
 
     fun registrarTransaccion(monto: String, tipo: String, descripcion: String?, categoriaId: Long?) {
-        val montoDouble = monto.trim().toDoubleOrNull()
-        if (montoDouble == null || montoDouble <= 0) {
+        val montoDouble = monto.toMontoPositivo()
+        if (montoDouble == null) {
             _mensajeUI.value = "Ingresá un monto válido (mayor a 0)"
             return
         }
