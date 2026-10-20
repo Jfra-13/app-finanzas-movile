@@ -9,6 +9,8 @@ import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 import com.example.finanzas_independientes_app.domain.repository.FinanzasRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -45,6 +47,8 @@ class TransaccionesViewModel @Inject constructor(
     private val _isLastPage = MutableStateFlow(false)
     val isLastPage: StateFlow<Boolean> = _isLastPage
 
+    private var cargaJob: Job? = null
+
     // --- Date range filter (ISO yyyy-MM-dd, inclusive; null = no filter) ---
 
     private val _filtroFechas = MutableStateFlow<Pair<String, String>?>(null)
@@ -69,20 +73,24 @@ class TransaccionesViewModel @Inject constructor(
         if (_isLoading.value) return
         if (!refresh && _isLastPage.value) return
 
-        viewModelScope.launch {
+        cargaJob = viewModelScope.launch {
             _isLoading.value = true
             _mensajeError.value = null
 
             val page = if (refresh) 0 else _currentPage.value
 
             val rango = _filtroFechas.value
-            when (val result = finanzasRepository.listarTransacciones(
+            val result = finanzasRepository.listarTransacciones(
                 desde = rango?.first,
                 hasta = rango?.second,
                 page = page,
                 size = PAGE_SIZE,
                 sort = DEFAULT_SORT
-            )) {
+            )
+            // safeApiCall turns a cancellation into ApiResult.Error; a load dropped by
+            // recargar() must not write its result over the reload that replaced it.
+            ensureActive()
+            when (result) {
                 is ApiResult.Success -> {
                     val paginated = result.data
                     _currentPage.value = paginated.number + 1
@@ -104,6 +112,17 @@ class TransaccionesViewModel @Inject constructor(
 
             _isLoading.value = false
         }
+    }
+
+    /**
+     * Reload from page 0 after a mutation. Drops any in-flight page load first so a
+     * late page can't be appended to the fresh list, then releases the loading flag
+     * the mutation set, otherwise cargar() bails out on its guard.
+     */
+    private fun recargar() {
+        cargaJob?.cancel()
+        _isLoading.value = false
+        cargar(refresh = true)
     }
 
     /** Append next page (no-op if already on last page or loading). */
@@ -149,7 +168,7 @@ class TransaccionesViewModel @Inject constructor(
                     _transacciones.value = _transacciones.value.filter { it.id != id }
                     _isEmpty.value = _transacciones.value.isEmpty()
                     // Full refresh to keep pagination consistent
-                    cargar(refresh = true)
+                    recargar()
                 }
                 is ApiResult.Error -> {
                     _isLoading.value = false
@@ -176,7 +195,7 @@ class TransaccionesViewModel @Inject constructor(
                 categoriaId = categoriaId
             )) {
                 is ApiResult.Success -> {
-                    cargar(refresh = true)
+                    recargar()
                 }
                 is ApiResult.Error -> {
                     _isLoading.value = false
