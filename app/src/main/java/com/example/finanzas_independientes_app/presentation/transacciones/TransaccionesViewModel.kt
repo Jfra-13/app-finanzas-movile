@@ -115,9 +115,9 @@ class TransaccionesViewModel @Inject constructor(
     }
 
     /**
-     * Reload from page 0 after a mutation. Drops any in-flight page load first so a
-     * late page can't be appended to the fresh list, then releases the loading flag
-     * the mutation set, otherwise cargar() bails out on its guard.
+     * Reload from page 0 after a mutation or a filter change. Drops any in-flight load
+     * first so a late page (or one for the old range) can't land on the fresh list, then
+     * releases the loading flag, otherwise cargar() bails out on its guard.
      */
     private fun recargar() {
         cargaJob?.cancel()
@@ -139,13 +139,13 @@ class TransaccionesViewModel @Inject constructor(
             return
         }
         _filtroFechas.value = desde to hasta
-        cargar(refresh = true)
+        recargar()
     }
 
     fun limpiarFiltroFechas() {
         if (_filtroFechas.value == null) return
         _filtroFechas.value = null
-        cargar(refresh = true)
+        recargar()
     }
 
     private fun cargarCategorias() {
