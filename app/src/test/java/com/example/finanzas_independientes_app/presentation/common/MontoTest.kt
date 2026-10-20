@@ -13,6 +13,18 @@ class MontoTest {
     }
 
     @Test
+    fun `la coma se acepta como separador decimal`() {
+        assertEquals(10.5, "10,5".toMontoPositivo()!!, 0.0)
+        assertEquals(1.5, "1,500".toMontoPositivo()!!, 0.0) // decimal, never a thousands separator
+    }
+
+    @Test
+    fun `mas de un separador se rechaza`() {
+        assertNull("1.500,50".toMontoPositivo())
+        assertNull("1,2,3".toMontoPositivo())
+    }
+
+    @Test
     fun `NaN e Infinity se rechazan`() {
         assertNull("NaN".toMontoPositivo())
         assertNull("Infinity".toMontoPositivo())
