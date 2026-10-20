@@ -130,7 +130,7 @@ class CategoriasViewModel @Inject constructor(
 
     /** Upsert the monthly cap for a category. Amount must be at least 0.01. */
     fun fijarTope(categoriaId: Long, montoTexto: String) {
-        val monto = montoTexto.replace(",", ".").toMontoPositivo()
+        val monto = montoTexto.toMontoPositivo()
         if (monto == null || monto < 0.01) {
             _mensajeError.value = "Ingresá un monto válido (mayor a 0)."
             return
