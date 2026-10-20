@@ -125,6 +125,14 @@ class TransaccionesViewModel @Inject constructor(
         cargar(refresh = true)
     }
 
+    /**
+     * Releases the loading flag a failed mutation set, unless a list load still owns
+     * it; releasing it then would let cargarMas start a second load next to it.
+     */
+    private fun liberarCarga() {
+        _isLoading.value = cargaJob?.isActive == true
+    }
+
     /** Append next page (no-op if already on last page or loading). */
     fun cargarMas() {
         if (_isLastPage.value || _isLoading.value) return
@@ -171,7 +179,7 @@ class TransaccionesViewModel @Inject constructor(
                     recargar()
                 }
                 is ApiResult.Error -> {
-                    _isLoading.value = false
+                    liberarCarga()
                     _mensajeError.value = mapDeleteError(result.error)
                 }
             }
@@ -198,7 +206,7 @@ class TransaccionesViewModel @Inject constructor(
                     recargar()
                 }
                 is ApiResult.Error -> {
-                    _isLoading.value = false
+                    liberarCarga()
                     _mensajeError.value = mapUpdateError(result.error)
                 }
             }
