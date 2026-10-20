@@ -163,8 +163,9 @@ class DashboardViewModelTest {
 
     @Test
     fun `registrarTransaccion rechaza montos no numericos, cero o negativos sin llamar al repositorio`() {
-        // A comma is not normalized here (unlike Categorias), so it counts as invalid.
-        for (invalido in listOf("", "abc", "10,5", "0", "-3")) {
+        // No comma case: "10,5" becomes valid once this screen parses through toMontoPositivo
+        // (#12, #17), and MontoTest pins it there.
+        for (invalido in listOf("", "abc", "0", "-3")) {
             vm.limpiarMensaje()
             vm.registrarTransaccion(invalido, "INGRESO", null, null)
             assertEquals("monto '$invalido'", "Ingresá un monto válido (mayor a 0)", vm.mensajeUI.value)
