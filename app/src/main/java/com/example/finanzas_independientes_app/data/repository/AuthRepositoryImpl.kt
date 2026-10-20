@@ -96,11 +96,15 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun logout() {
         val refresh = session.refreshToken
-        if (refresh != null) {
-            // Best-effort revocation; idempotent server-side, result ignored on purpose.
-            safeUnitCall(gson) { api.logout(RefreshRequest(refresh)) }
+        try {
+            if (refresh != null) {
+                // Best-effort revocation; idempotent server-side, result ignored on purpose.
+                safeUnitCall(gson) { api.logout(RefreshRequest(refresh)) }
+            }
+        } finally {
+            // Also on cancellation: leaving the screen mid-request must still log out.
+            session.clear()
         }
-        session.clear()
     }
 
     override suspend fun eliminarCuenta(password: String): ApiResult<Unit> {
