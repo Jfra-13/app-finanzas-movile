@@ -2,6 +2,7 @@ package com.example.finanzas_independientes_app.core.network
 
 import com.example.finanzas_independientes_app.data.remote.dto.AuthData
 import com.google.gson.Gson
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -181,6 +182,16 @@ class SafeApiCallTest {
         assertEquals(ApiCode.UNKNOWN, error.code)
         assertEquals(502, error.httpStatus)
         assertNull(error.message)
+    }
+
+    @Test
+    fun `una cancelacion se propaga en vez de volver como error`() = runTest {
+        // Swallowing it would let a cancelled coroutine keep running its error branch.
+        val thrown = runCatching {
+            safeApiCall<AuthData>(gson) { throw CancellationException("cancelada") }
+        }.exceptionOrNull()
+
+        assertTrue(thrown is CancellationException)
     }
 
     @Test

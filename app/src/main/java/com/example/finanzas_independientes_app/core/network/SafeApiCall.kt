@@ -1,6 +1,7 @@
 package com.example.finanzas_independientes_app.core.network
 
 import com.google.gson.Gson
+import kotlinx.coroutines.CancellationException
 import retrofit2.Response
 import java.io.IOException
 
@@ -46,6 +47,9 @@ private suspend fun <T, R> execute(
     }
 } catch (io: IOException) {
     ApiResult.Error(AppError.Network)
+} catch (e: CancellationException) {
+    // Not a failure: the caller is gone and must not run its error branch.
+    throw e
 } catch (e: Exception) {
     ApiResult.Error(AppError.Unexpected(e))
 }
