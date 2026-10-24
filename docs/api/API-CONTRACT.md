@@ -7,11 +7,10 @@ Todo lo necesario para conectar el cliente con esta API. El cliente del MVP es u
 > - OpenAPI JSON: `http://localhost:9090/v3/api-docs`
 >
 > Este documento es la guía explicada; ante cualquier diferencia, manda Swagger.
-> El catálogo canónico de códigos `code` está en [README-READINESS.md](https://github.com/Jfra-13/api-finanzas-backend/blob/main/README-READINESS.md) (repo del backend).
-
-> **Requerimientos pendientes de backend** (specs pedidas por el cliente, aún no en Swagger):
-> - [backend-analytics.md](backend-analytics.md) — analíticas, comparaciones, presupuestos, proyección y recomendaciones.
-> - [backend-profile.md](backend-profile.md) — perfil/cuenta, CRUD de categorías, calendario diario, historial de metas y gráficos nuevos.
+> El catálogo canónico de códigos `code` de error está al final de este documento.
+>
+> **Copia sincronizada** de `docs/integracion-frontend.md` del backend (commit `5a72383`, 2026-10-19) más la sección final "Contratos finales P1". Para resincronizar: copiar ese archivo y conservar esa sección.
+> `backend-analytics.md` y `backend-profile.md` son las specs que pidió el cliente; quedan como registro histórico y donde difieran manda este documento.
 
 ## Datos base
 
@@ -112,7 +111,7 @@ Respuesta exitosa (`code: "LOGIN_SUCCESS"`):
 }
 ```
 
-Errores: `401 UNAUTHORIZED` con credenciales incorrectas.
+Errores: `401 UNAUTHORIZED` con credenciales incorrectas; `429 LOGIN_BLOQUEADO` tras 5 intentos fallidos en 15 minutos para ese email (rechaza incluso la password correcta hasta que vence la ventana; aplica igual a emails inexistentes).
 
 ### POST `/api/v1/usuarios/refresh`
 
@@ -131,7 +130,7 @@ Errores: `401 REFRESH_TOKEN_INVALIDO` (inexistente, expirado o ya usado).
 
 Request: `{ "email": "juan@correo.com" }`
 
-Siempre responde `200` con `code: "OTP_SENT"` exista o no el correo (anti-enumeración). Si existe, envía por email un OTP de 4 dígitos válido por 10 minutos.
+Siempre responde `200` con `code: "OTP_SENT"` exista o no el correo (anti-enumeración). Si existe, envía por email un OTP de 4 dígitos válido por 10 minutos. Mientras haya un código vigente, un nuevo pedido no genera ni reenvía otro (sigue respondiendo `200 OTP_SENT`).
 
 ### POST `/api/v1/usuarios/verify-otp`
 
@@ -277,6 +276,9 @@ Semántica del valor:
 - **Positivo**: cuota diaria que falta ganar (faltante ÷ días restantes, redondeo a 2 decimales).
 - **Negativo**: la meta ya se superó; `abs(valor)` es el excedente. Mostrar "meta superada por X".
 - El cálculo usa **utilidad neta del mes en curso** (ingresos − egresos del mes actual), no el acumulado histórico.
+
+**Sin meta activa y sin params ad-hoc** responde `404 META_NO_ENCONTRADA` (igual que
+`progreso-metas`): la app debe mostrar "Sin meta activa", nunca un número.
 
 ### GET `/api/v1/finanzas/resumen-semanal`
 
@@ -436,27 +438,93 @@ Respuesta (`code: "FINANCIAL_HEALTH_OK"`) — lista (puede venir vacía):
 }
 ```
 
-Códigos de señal posibles: `GASTO_DIARIO_ALTO`, `META_CERCA`, `META_EN_RIESGO`.
+Códigos de señal posibles: `GASTO_DIARIO_ALTO`, `META_CERCA`, `META_EN_RIESGO`,
+`EGRESOS_SUPERAN_INGRESOS`, `TASA_AHORRO_BAJA`, `TASA_AHORRO_SANA`, `PRESUPUESTO_EXCEDIDO`,
+`PROYECCION_BAJO_META`. Cada item incluye además `severidad` (`ALTA`/`MEDIA`/`BAJA`) y
+`categoriaId` (nullable; solo viene en `PRESUPUESTO_EXCEDIDO`).
+
+### Endpoints agregados tras la auditoría del front (julio 2026)
+
+Contrato completo en Swagger y en `RESPUESTA-BACKEND-AUDIT.md` (raíz del repo):
+
+| Método | Ruta | `code` éxito |
+|---|---|---|
+| GET | `/finanzas/resumen-diario?mes=YYYY-MM` | `DAILY_SUMMARY_OK` |
+| GET | `/finanzas/tendencia?granularidad=SEMANA\|MES&ventana=N` | `TREND_OK` |
+| GET | `/finanzas/ingresos-por-dia-semana?ventana=N` | `WEEKDAY_INCOME_OK` |
+| PUT | `/finanzas/categorias/{id}` | `CATEGORY_UPDATED` |
+| DELETE | `/finanzas/categorias/{id}` | `CATEGORY_DELETED` |
+| GET | `/usuarios/me` | `PROFILE_OK` |
+| PUT | `/usuarios/me` | `PROFILE_UPDATED` |
+| POST | `/usuarios/logout` (público, idempotente) | `LOGGED_OUT` |
 
 ---
 
-## Catálogo de códigos de error
+## Catálogo canónico de códigos `code` de error
 
-Catálogo canónico y siempre actualizado en [README-READINESS.md](https://github.com/Jfra-13/api-finanzas-backend/blob/main/README-READINESS.md). Resumen:
+Fuente de verdad de los códigos de error. El frontend ramifica **siempre por `code`**, nunca por `message`.
 
 | HTTP | `code` | Cuándo |
 |---|---|---|
-| 400 | `VALIDATION_ERROR` | Falla de validación (trae `details[]`) |
-| 400 | `MALFORMED_JSON` | Body JSON inválido |
+| 400 | `VALIDATION_ERROR` | Falla de validación de campos (trae `details[]`) |
+| 400 | `MALFORMED_JSON` | Body JSON mal formado |
+| 400 | `RANGO_FECHAS_INVALIDO` | `desde > hasta`, o fecha (`desde`/`hasta`) mal formada |
+| 400 | `PARAMETRO_INVALIDO` | Query param con tipo/formato inválido (que no sea fecha) |
 | 401 | `UNAUTHORIZED` | Sin token, token inválido/expirado, o credenciales incorrectas en login |
-| 401 | `REFRESH_TOKEN_INVALIDO` | Refresh token inexistente, expirado o ya usado |
+| 401 | `REFRESH_TOKEN_INVALIDO` | Refresh token inexistente, expirado o ya usado (rotado) |
+| 401 | `CREDENCIALES_INVALIDAS` | Credenciales inválidas (variante explícita) |
 | 403 | `FORBIDDEN` / `ACCESO_DENEGADO` | Sin permisos / el recurso es de otro usuario |
 | 404 | `USUARIO_NO_ENCONTRADO` | Usuario inexistente |
 | 404 | `TRANSACCION_NO_ENCONTRADA` | Transacción inexistente |
 | 404 | `META_NO_ENCONTRADA` | No hay meta activa este período |
 | 404 | `CATEGORIA_NO_ENCONTRADA` | Categoría inexistente o no visible |
+| 404 | `PRESUPUESTO_NO_ENCONTRADO` | Presupuesto inexistente |
+| 404 | `NOT_FOUND` | Ruta inexistente |
+| 405 | `METHOD_NOT_ALLOWED` | Método HTTP no soportado por la ruta |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` | `Content-Type` no soportado (usar `application/json`) |
+| 4xx | nombre del status HTTP | Otros errores de cliente detectados por el framework (p. ej. `BAD_REQUEST` por parámetro requerido faltante) |
 | 422 | `EMAIL_DUPLICADO` | Registro con correo ya existente |
 | 422 | `OTP_INVALIDO` | OTP incorrecto (o email inexistente) |
 | 422 | `OTP_EXPIRADO` | OTP vencido (>10 min) |
 | 429 | `OTP_BLOQUEADO` | Demasiados intentos OTP fallidos |
+| 429 | `LOGIN_BLOQUEADO` | Demasiados logins fallidos para ese email; reintentar en 15 minutos |
 | 500 | `INTERNAL_SERVER_ERROR` | Error no controlado |
+
+---
+
+## Contratos finales P1 (cierre de auditoría)
+
+Fuente: `docs/CONTRATOS-FINALES-BACKEND.md` del repo backend. Todos implementados.
+
+### GET `/api/v1/finanzas/transacciones` — param `sinCategoria`
+
+- `sinCategoria=true` → solo transacciones **sin** categoría. Compone con `tipo`, `desde`, `hasta` y paginado.
+- `sinCategoria=true` + `categoriaId` → `400 PARAMETRO_INVALIDO`.
+- `sinCategoria=false` u omitido → sin filtro (no significa "solo categorizadas").
+
+### GET `/api/v1/finanzas/metas/historial?meses=N` — Bearer
+
+Respuesta `code: "GOALS_HISTORY_OK"`, un item por mes **con meta registrada**, ascendente:
+```json
+{ "data": [ { "periodo": "2026-06", "metaMensual": 3000.0, "utilidadReal": 2450.0, "cumplida": false } ] }
+```
+- `meses`: ventana incluyendo el mes en curso; default 6, mínimo 1.
+- `utilidadReal` = ingresos − egresos; en el mes en curso, acumulado a hoy. `cumplida` = `utilidadReal >= metaMensual`.
+- Sin metas en la ventana → lista vacía, no 404.
+
+### POST `/api/v1/usuarios/me/eliminar` — Bearer
+
+Baja de cuenta con **soft-delete y 30 días de gracia**. `POST` (no `DELETE` con body) por compatibilidad con Retrofit/proxies.
+
+- Request: `{ "password": "..." }` (re-autenticación).
+- Éxito `200 ACCOUNT_DELETED`: se revocan todos los refresh tokens y el access token vigente deja de ser aceptado de inmediato. El cliente limpia la sesión.
+- Errores: password incorrecta → `401 CREDENCIALES_INVALIDAS` (mostrar inline, **no** expulsar la sesión); password ausente → `400 VALIDATION_ERROR`.
+- Reactivación: iniciar sesión dentro de los 30 días reactiva la cuenta. Pasada la gracia, login → `404 USUARIO_NO_ENCONTRADO`.
+
+### Login — campo `cuentaReactivada`
+
+`POST /usuarios/login` agrega `cuentaReactivada: boolean` en `data`: `true` solo cuando ese login reactivó una cuenta con baja pendiente (login normal y refresh: `false`).
+
+### Comparaciones — `compararCon`
+
+Acepta `PERIODO_ANTERIOR` (default) y `MISMO_PERIODO_ANIO_ANTERIOR` (con **ANIO**, sin ñ).
