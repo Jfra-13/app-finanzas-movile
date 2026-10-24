@@ -17,6 +17,7 @@ import com.example.finanzas_independientes_app.databinding.DialogEditTransaction
 import com.example.finanzas_independientes_app.domain.model.Categoria
 import com.example.finanzas_independientes_app.domain.model.Transaccion
 import com.example.finanzas_independientes_app.presentation.common.ViewStateHelper
+import com.example.finanzas_independientes_app.presentation.common.toMontoPositivo
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -222,8 +223,8 @@ class TransaccionesActivity : AppCompatActivity() {
 
         dialogBinding.btnGuardar.setOnClickListener {
             val montoText = dialogBinding.etMonto.text?.toString()?.trim() ?: ""
-            val monto = montoText.toDoubleOrNull()
-            if (monto == null || monto <= 0) {
+            val monto = montoText.toMontoPositivo()
+            if (monto == null) {
                 Toast.makeText(this, "Ingresá un monto válido (mayor a 0)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
