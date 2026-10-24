@@ -18,6 +18,7 @@ fun AppError.toUserMessage(): String = when (this) {
         ApiCode.OTP_INVALIDO -> "El código ingresado no es válido."
         ApiCode.OTP_EXPIRADO -> "El código expiró. Pedí uno nuevo."
         ApiCode.OTP_BLOQUEADO -> "Demasiados intentos. Esperá unos minutos."
+        ApiCode.LOGIN_BLOQUEADO -> "Demasiados intentos. Probá de nuevo en 15 minutos."
         ApiCode.ACCESO_DENEGADO, ApiCode.FORBIDDEN -> "No tenés permiso para esta acción."
         ApiCode.META_NO_ENCONTRADA -> "Todavía no fijaste una meta este mes."
         ApiCode.CATEGORIA_NO_ENCONTRADA -> "La categoría seleccionada no existe."
