@@ -61,7 +61,8 @@ class DashboardViewModel @Inject constructor(
             // today income
             when (val r = deferredHoy.await()) {
                 is ApiResult.Success -> _ingresoHoy.value = String.format("%.2f", r.data)
-                is ApiResult.Error -> _ingresoHoy.value = handleError(r.error, silent = true) ?: "--"
+                // Numeric field: never show an error sentence here.
+                is ApiResult.Error -> _ingresoHoy.value = "--"
             }
 
             // daily quota (same logic as cargarCuotaDiaria)
@@ -206,20 +207,17 @@ class DashboardViewModel @Inject constructor(
 
     // --- Helpers ---
 
-    /**
-     * Maps an AppError to a Spanish user-facing string.
-     * Returns null when [silent] = true and the error is non-actionable.
-     */
-    private fun handleError(error: AppError, silent: Boolean = false): String? {
+    /** Maps an AppError to a Spanish user-facing string. */
+    private fun handleError(error: AppError): String {
         return when (error) {
             is AppError.Api -> when (error.code) {
-                ApiCode.META_NO_ENCONTRADA -> if (silent) null else "Sin meta activa para este período"
+                ApiCode.META_NO_ENCONTRADA -> "Sin meta activa para este período"
                 ApiCode.UNAUTHORIZED -> "Sesión expirada. Volvé a iniciar sesión."
                 ApiCode.VALIDATION_ERROR -> "Datos inválidos. Revisá los campos."
-                else -> if (silent) null else "Error del servidor: ${error.code.raw}"
+                else -> "Error del servidor: ${error.code.raw}"
             }
-            is AppError.Network -> if (silent) null else "Sin conexión. Verificá tu internet."
-            is AppError.Unexpected -> if (silent) null else "Error inesperado. Intentá de nuevo."
+            is AppError.Network -> "Sin conexión. Verificá tu internet."
+            is AppError.Unexpected -> "Error inesperado. Intentá de nuevo."
         }
     }
 }
