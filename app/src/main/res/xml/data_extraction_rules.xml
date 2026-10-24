@@ -4,7 +4,8 @@
     does NOT block device-to-device transfer, so both paths are excluded here.
 
     Two reasons for the exclusions:
-    - Privacy: finanzas.db holds the user's transactions in plain SQLite.
+    - Privacy: finanzas.db holds the user's transactions. It is encrypted with
+      SQLCipher, but its key never leaves the device either, so a copy is useless.
     - Correctness: the session tokens live in EncryptedSharedPreferences whose
       master key stays in the Android Keystore and is never transferred. A
       restored prefs file would be undecryptable and fail on first read.

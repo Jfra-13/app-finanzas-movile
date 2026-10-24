@@ -17,6 +17,7 @@ hilt = "2.59.2"
 ksp = "2.2.10-2.0.2"
 vico = "3.2.3"
 room = "2.7.2"
+sqlcipher = "4.9.0"
 coreSplashscreen = "1.0.1"
 
 [libraries]
@@ -44,6 +45,7 @@ vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref 
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlcipher-android = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlcipher" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 
 [plugins]
